@@ -1,0 +1,103 @@
+## ビルド成果物
+DerivedData/
+build/
+
+## 個人設定
+xcuserdata/
+
+## ワークスペース設定
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+## スキーム管理
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcworkspace/xcshareddata/IDEBuildOperationRecords/*.xcbuildoperation
+
+## プロジェクト設定
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Obj-C/Swift固有のファイル
+*.hmap
+
+## アプリパッケージング
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## CocoaPods
+Pods/
+
+## Carthage
+Carthage/Build/
+
+## Swift Package Manager
+.build/
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+## アーカイブ
+*.xcarchive
+
+## プレイグラウンド
+timeline.xctimeline
+playground.xcworkspace
+
+## SwiftUIプレビュー
+*.designer.swift
+*.swiftui
+
+## シンボリケーション
+*.bcsymbolmap
+
+## 一時ファイル
+*.tmp
+*.temp
+*.swp
+*~.nib
+
+## OS固有のファイル
+.DS_Store
+*.DS_Store
+
+## ロックファイル
+*.lock
+
+## ログファイル
+*.log
+
+## カバレッジ
+*.gcno
+
+## プロファイリング
+*.profdata
+
+## リソース
+*.strings.old
+*.stringsdict.old
+
+## ユニットテストとUIテストの生成ファイル
+test-results.xcresult
+
+## Xcode 11以降
+*.xcresult
+
+## Xcode 13以降
+*.xcattach
+
+## シンボルグラフ
+*.symbols.json
+
+## 設定ファイル
+Config.xcconfig
+GoogleService-Info.plist

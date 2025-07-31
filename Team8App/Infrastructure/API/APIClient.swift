@@ -34,16 +34,22 @@ class APIClient {
 
         var urlRequest = URLRequest(url: url)
         urlRequest.method = method
-        urlRequest.headers = headers ?? HTTPHeaders()
-
+        var requestHeaders = headers ?? HTTPHeaders()
+        
+        // bodyParametersがある場合のみContent-Typeを設定（リクエスト固有のヘッダーが優先）
         if let bodyParameters = request.parameters {
             do {
                 urlRequest.httpBody = try JSONSerialization.data(withJSONObject: bodyParameters)
-                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                // Content-Typeがまだ設定されていない場合のみ設定
+                if requestHeaders["Content-Type"] == nil {
+                    requestHeaders["Content-Type"] = "application/json"
+                }
             } catch {
                 throw APIError.requestFailed(error)
             }
         }
+        
+        urlRequest.headers = requestHeaders
 
         return try await withCheckedThrowingContinuation { continuation in
             AF.request(urlRequest)

@@ -23,7 +23,7 @@ struct WalkSummaryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 VStack {
                     // Header section
-                    HeaderView(onDismiss: { dismiss() })
+                    HeaderView(onDismiss: { viewModel.dismiss() })
                     
                     // Walk Summary Card
                     WalkSummaryCard(viewModel: viewModel)
@@ -40,6 +40,9 @@ struct WalkSummaryView: View {
                 .padding(.horizontal, 16)
             }
             
+        }
+        .onAppear {
+            viewModel.onDismiss = { dismiss() }
         }
     }
 }

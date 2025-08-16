@@ -22,6 +22,13 @@ class WalkSummaryViewModel {
         "手作り雑貨店「手雑店」"
     ]
     var shouldPost: Bool? = nil
+    
+    // Dismiss action
+    var onDismiss: (() -> Void)?
+    
+    func dismiss() {
+        onDismiss?()
+    }
 }
 
 

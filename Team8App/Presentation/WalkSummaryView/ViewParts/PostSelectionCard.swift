@@ -23,7 +23,7 @@ struct PostSelectionCard: View {
                 Button(action: { viewModel.shouldPost = true }) {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.gray)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("投稿する")
                                 .font(.body)

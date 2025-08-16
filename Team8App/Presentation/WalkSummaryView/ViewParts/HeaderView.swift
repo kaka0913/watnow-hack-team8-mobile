@@ -18,7 +18,7 @@ struct HeaderView: View {
                     .foregroundColor(.blue)
                 Text("戻る")
             }
-            Text("🥳散歩完了！")
+            Text("           🥳散歩完了！")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .center)
             Spacer().padding(.leading, 16)

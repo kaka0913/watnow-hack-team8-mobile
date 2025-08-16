@@ -35,6 +35,7 @@ struct WalkSummaryView: View {
                     PostSelectionCard(viewModel: viewModel)
                     
                     Spacer()
+
                 }
                 .padding(.horizontal, 16)
             }

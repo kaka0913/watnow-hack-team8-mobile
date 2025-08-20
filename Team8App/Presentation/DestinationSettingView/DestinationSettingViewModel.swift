@@ -10,6 +10,10 @@ class DestinationSettingViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
     
+    // MARK: - Navigation Properties
+    var showThemeSelection: Bool = false
+    var onDismiss: (() -> Void)?
+    
     // MARK: - Computed Properties
     var isFormValid: Bool {
         return !destination.isEmpty && !selectedTheme.isEmpty
@@ -78,5 +82,14 @@ class DestinationSettingViewModel {
         destination = ""
         selectedTheme = ""
         errorMessage = nil
+    }
+    
+    // MARK: - Navigation Methods
+    func dismiss() {
+        onDismiss?()
+    }
+    
+    func toggleThemeSelection() {
+        showThemeSelection.toggle()
     }
 }

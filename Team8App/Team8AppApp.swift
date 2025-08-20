@@ -11,7 +11,7 @@ import SwiftUI
 struct Team8AppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DestinationSettingView()
         }
     }
 }

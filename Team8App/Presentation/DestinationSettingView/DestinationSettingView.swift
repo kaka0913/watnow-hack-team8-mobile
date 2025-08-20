@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DestinationSettingView: View {
     @State private var viewModel = DestinationSettingViewModel()
-    @State private var showThemeSelection = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -14,7 +13,7 @@ struct DestinationSettingView: View {
                 VStack(spacing: 20) {
                     // Header
                     DestinationHeaderView(onBack: {
-                        dismiss()
+                        viewModel.dismiss()
                     })
                     
                     // Location Settings Card
@@ -27,7 +26,7 @@ struct DestinationSettingView: View {
                     // Theme Selection Card
                     ThemeSelectionCard(
                         selectedTheme: $viewModel.selectedTheme,
-                        showThemeSelection: $showThemeSelection,
+                        showThemeSelection: $viewModel.showThemeSelection,
                         themePlaceholder: viewModel.themePlaceholder,
                         availableThemes: viewModel.availableThemes,
                         onThemeSelect: viewModel.selectTheme
@@ -55,6 +54,11 @@ struct DestinationSettingView: View {
                         Text(errorMessage)
                     }
                 }
+            }
+        }
+        .onAppear {
+            viewModel.onDismiss = {
+                dismiss()
             }
         }
         .navigationBarHidden(true)

@@ -14,7 +14,7 @@ struct WalkOptionsSection: View {
                 subtitle: viewModel.destinationWalkSubtitle,
                 buttonText: "散歩を始める",
                 buttonColor: .blue,
-                action: viewModel.startWalkWithDestination
+                action: viewModel.startDestinationWalk
             )
             
             // 目的地なしで出発
@@ -26,7 +26,7 @@ struct WalkOptionsSection: View {
                 subtitle: viewModel.noDestinationWalkSubtitle,
                 buttonText: "散歩を始める",
                 buttonColor: .green,
-                action: viewModel.startWalkWithoutDestination
+                action: viewModel.startFreeWalk
             )
             
             // ハニカムマップを見る
@@ -38,7 +38,7 @@ struct WalkOptionsSection: View {
                 subtitle: viewModel.exploreMapSubtitle,
                 buttonText: "地図を探索する",
                 buttonColor: Color(red: 0.7, green: 0.4, blue: 0.9),
-                action: viewModel.exploreMap
+                action: viewModel.exploreHoneycombMap
             )
         }
     }

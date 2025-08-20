@@ -14,9 +14,7 @@ class HomeViewModel {
     var errorMessage: String?
     
     // MARK: - Navigation Properties
-    var showDestinationSetting: Bool = false
-    var showFreeWalk: Bool = false
-    var showHoneycombMap: Bool = false
+    var navigationPath = NavigationPath()
     
     // MARK: - Walk Option Properties (WalkOptionCard用)
     var appTitle: String {
@@ -51,24 +49,18 @@ class HomeViewModel {
         return "他の散歩者を追体験しよう"
     }
     
-    // MARK: - Initialization
-    init() {
-    // 必要に応じて初期化ロジックを追加
+    // MARK: - Actions
+    func startDestinationWalk() {
+        // ナビゲーション画面に遷移
+        navigationPath.append("NavigationView")
     }
     
-    // MARK: - Walk Option Actions
-    func startWalkWithDestination() {
-        print("目的地を決めて出発が選択されました")
-        showDestinationSetting = true
+    func startFreeWalk() {
+        navigationPath.append("FreeWalk")
     }
     
-    func startWalkWithoutDestination() {
-        print("目的地なしで出発が選択されました")
-        showFreeWalk = true
-    }
-    
-    func exploreMap() {
-        print("ハニカムマップを見るが選択されました")
-        showHoneycombMap = true
+    func exploreHoneycombMap() {
+        // ハニカムマップ探索画面に遷移するロジックを実装予定
+        print("ハニカムマップ探索画面に遷移")
     }
 }

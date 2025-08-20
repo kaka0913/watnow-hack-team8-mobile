@@ -10,17 +10,6 @@ struct WalkOptionCard: View {
     let buttonColor: Color
     let action: () -> Void
     
-    init(icon: String, iconColor: Color, backgroundColor: Color, title: String, subtitle: String, buttonText: String, buttonColor: Color, action: @escaping () -> Void) {
-        self.icon = icon
-        self.iconColor = iconColor
-        self.backgroundColor = backgroundColor
-        self.title = title
-        self.subtitle = subtitle
-        self.buttonText = buttonText
-        self.buttonColor = buttonColor
-        self.action = action
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 16) {
@@ -98,7 +87,7 @@ struct WalkOptionCard: View {
             iconColor: .white,
             backgroundColor: .blue,
             title: "目的地を決めて出発",
-            subtitle: "寄り道しながらのんびりと何から",
+            subtitle: "寄り道しながらのんびりと散歩しよう",
             buttonText: "散歩を始める",
             buttonColor: .blue,
             action: { print("Button tapped") }
@@ -116,7 +105,7 @@ struct WalkOptionCard: View {
         )
         
         WalkOptionCard(
-            icon: "💜",
+            icon: "🔶",
             iconColor: .white,
             backgroundColor: .purple,
             title: "ハニカムマップを見る",

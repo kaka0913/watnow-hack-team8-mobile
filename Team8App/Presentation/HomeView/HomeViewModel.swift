@@ -32,7 +32,7 @@ class HomeViewModel {
     }
     
     var destinationWalkSubtitle: String {
-        return "寄り道しながらのんびりと何から"
+        return "寄り道しながらのんびりと散歩しよう"
     }
     
     var noDestinationWalkTitle: String {
@@ -53,7 +53,7 @@ class HomeViewModel {
     
     // MARK: - Initialization
     init() {
-        // 필요시 초기화 로직 추가
+    // 必要に応じて初期化ロジックを追加
     }
     
     // MARK: - Walk Option Actions

@@ -10,6 +10,11 @@ struct WalkOptionCard: View {
     let buttonColor: Color
     let action: () -> Void
     
+    // 絵文字判定のロジックをcomputed propertyでキャッシュ
+    private var isEmojiIcon: Bool {
+        icon.count <= 3 && icon.unicodeScalars.allSatisfy({ $0.properties.isEmoji })
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 16) {
@@ -19,7 +24,7 @@ struct WalkOptionCard: View {
                     .frame(width: 56, height: 56)
                     .overlay(
                         Group {
-                            if icon.count <= 3 && icon.unicodeScalars.allSatisfy({ $0.properties.isEmoji }) {
+                            if isEmojiIcon {
                                 // 絵文字の場合
                                 Text(icon)
                                     .font(.system(size: 28))

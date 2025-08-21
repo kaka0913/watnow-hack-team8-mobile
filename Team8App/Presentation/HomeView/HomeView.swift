@@ -23,8 +23,8 @@ struct HomeView: View {
                         
                         // アプリヘッダー部分
                         AppHeaderView(
-                            appTitle: viewModel.appTitle,
-                            appSubtitle: viewModel.appSubtitle
+                            appTitle: WalkOptionConstants.appTitle,
+                            appSubtitle: WalkOptionConstants.appSubtitle
                         )
                         
                         // 散歩オプション部分
@@ -37,12 +37,12 @@ struct HomeView: View {
             }
             .navigationDestination(for: String.self) { destination in
                 switch destination {
-                case "NavigationView":
-                    NavigationView()
+                case "DestinationWalk":
+                    DestinationWalkView()
                 case "FreeWalk":
                     FreeWalkView()
-                case "WalkSummary":
-                    WalkSummaryView()
+                case "HoneycombMap":
+                    HoneycombMapView()
                 default:
                     EmptyView()
                 }

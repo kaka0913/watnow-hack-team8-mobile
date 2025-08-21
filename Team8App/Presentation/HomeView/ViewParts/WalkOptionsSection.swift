@@ -10,9 +10,9 @@ struct WalkOptionsSection: View {
                 icon: "🧭",
                 iconColor: .white,
                 backgroundColor: .blue,
-                title: viewModel.destinationWalkTitle,
-                subtitle: viewModel.destinationWalkSubtitle,
-                buttonText: "散歩を始める",
+                title: WalkOptionConstants.destinationWalkTitle,
+                subtitle: WalkOptionConstants.destinationWalkSubtitle,
+                buttonText: WalkOptionConstants.walkButtonText,
                 buttonColor: .blue,
                 action: viewModel.startDestinationWalk
             )
@@ -22,9 +22,9 @@ struct WalkOptionsSection: View {
                 icon: "⏰",
                 iconColor: .white,
                 backgroundColor: .green,
-                title: viewModel.noDestinationWalkTitle,
-                subtitle: viewModel.noDestinationWalkSubtitle,
-                buttonText: "散歩を始める",
+                title: WalkOptionConstants.noDestinationWalkTitle,
+                subtitle: WalkOptionConstants.noDestinationWalkSubtitle,
+                buttonText: WalkOptionConstants.walkButtonText,
                 buttonColor: .green,
                 action: viewModel.startFreeWalk
             )
@@ -34,9 +34,9 @@ struct WalkOptionsSection: View {
                 icon: "💜",
                 iconColor: .white,
                 backgroundColor: Color(red: 0.7, green: 0.4, blue: 0.9),
-                title: viewModel.exploreMapTitle,
-                subtitle: viewModel.exploreMapSubtitle,
-                buttonText: "地図を探索する",
+                title: WalkOptionConstants.exploreMapTitle,
+                subtitle: WalkOptionConstants.exploreMapSubtitle,
+                buttonText: WalkOptionConstants.exploreButtonText,
                 buttonColor: Color(red: 0.7, green: 0.4, blue: 0.9),
                 action: viewModel.exploreHoneycombMap
             )

@@ -1,31 +1,30 @@
 //
-//  FreeWalkView.swift
+//  DestinationWalkView.swift
 //  Team8App
 //
-//  Created by GitHub Copilot on 2025/08/20.
+//  Created by GitHub Copilot on 2025/08/21.
 //
 
 import SwiftUI
 
-struct FreeWalkView: View {
+struct DestinationWalkView: View {
     var body: some View {
         ZStack {
             Color.white
                 .ignoresSafeArea()
             
-            Text("B")
+            Text("A")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.black)
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("目的地なしで出発")
-     }
+        .navigationTitle("目的地を決めて出発")
     }
-
+}
 
 #Preview {
     NavigationStack {
-        FreeWalkView()
+        DestinationWalkView()
     }
 }

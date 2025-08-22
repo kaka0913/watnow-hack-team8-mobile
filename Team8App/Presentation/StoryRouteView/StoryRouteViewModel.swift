@@ -6,7 +6,7 @@ class StoryRouteViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
     
-    private let storyRouteRepository = StoryRouteRepository.shared
+    // private let storyRouteRepository = StoryRouteRepository.shared
     
     init() {
         Task {
@@ -21,8 +21,8 @@ class StoryRouteViewModel {
         defer { isLoading = false }
         
         do {
-            let routes = try await storyRouteRepository.fetchStoryRoutes()
-            self.storyRoutes = routes
+//            let routes = try await storyRouteRepository.fetchStoryRoutes()
+//            self.storyRoutes = routes
         } catch {
             print("ストーリールートの取得に失敗しました: \(error)")
             self.errorMessage = "ルートの読み込みに失敗しました。もう一度お試しください。"

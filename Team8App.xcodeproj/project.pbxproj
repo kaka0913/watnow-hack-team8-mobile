@@ -18,10 +18,6 @@
 		CE815B582E40B3D2004F9AA6 /* Exceptions for "Team8App" folder in "Team8App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Domain/Entity/.gitkeep,
-				Domain/RepositoryProtocols/.gitkeep,
-				Infrastructure/Repositories/.gitkeep,
-				Presentation/.gitkeep,
 				Service/.gitkeep,
 			);
 			target = 2220AB692E35DF4E000E144A /* Team8App */;

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2256E98E2E36061700914428 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2256E98D2E36061700914428 /* Alamofire */; };
+		2256E98E2E36061700914428 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2256E98D2E36061700914428 /* Alamofire */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */

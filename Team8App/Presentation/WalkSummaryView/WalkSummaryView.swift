@@ -23,7 +23,7 @@ struct WalkSummaryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 VStack {
                     // Header section
-                    HeaderView(onDismiss: { 
+                    HeaderView(onDismiss: {
                         dismiss()
                     })
                     

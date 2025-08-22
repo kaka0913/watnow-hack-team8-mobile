@@ -17,7 +17,7 @@ struct MapContainerView: View {
     var body: some View {
         ZStack {
             // 地図表示
-            Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
+                Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
                 MapAnnotation(coordinate: annotation.coordinate) {
                     Circle()
                         .fill(annotation.color)
@@ -112,7 +112,7 @@ private struct RouteOverlayView: View {
 }
 
 #Preview {
-    @State var region = MKCoordinateRegion(
+    @Previewable @State var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     )

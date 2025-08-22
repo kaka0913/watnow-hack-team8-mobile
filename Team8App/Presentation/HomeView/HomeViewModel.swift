@@ -18,7 +18,7 @@ class HomeViewModel {
     
     // MARK: - Actions
     func startDestinationWalk() {
-        navigationPath.append("DestinationWalk")
+        navigationPath.append("DestinationSetting")
     }
     
     func startFreeWalk() {
@@ -29,4 +29,3 @@ class HomeViewModel {
         navigationPath.append("HoneycombMap")
     }
 }
-

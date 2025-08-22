@@ -67,7 +67,7 @@ struct ThemeSelectionSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List(themes, id: \.self) { theme in
                 Button(action: {
                     onSelect(theme)

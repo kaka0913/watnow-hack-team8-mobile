@@ -32,13 +32,16 @@ struct RouteStepsView: View {
                 .foregroundColor(.primary)
                 .padding(.horizontal, 16)
             
-            // ステップリスト
-            LazyVStack(spacing: 8) {
-                ForEach(steps, id: \.stepNumber) { step in
-                    RouteStepRow(step: step)
+            // ステップリスト - ScrollViewでラップしてスクロール可能にする
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    ForEach(steps, id: \.stepNumber) { step in
+                        RouteStepRow(step: step)
+                    }
                 }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
+            .frame(maxHeight: 300) // 最大高さを制限してスクロール可能にする
         }
     }
 }

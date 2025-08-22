@@ -28,10 +28,9 @@ struct StoryRoute: Identifiable, Codable {
         case orange = "orange"
         
         var emoji: String {
-            switch self {
-            case .pink, .green, .purple, .blue, .orange:
+ 
                 return "🐝"
-            }
+            
         }
     }
 }

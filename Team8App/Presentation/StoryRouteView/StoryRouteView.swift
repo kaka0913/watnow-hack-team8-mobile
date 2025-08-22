@@ -72,9 +72,7 @@ struct StoryRouteView: View {
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
-            
 
-            .buttonStyle(.bordered)
         }
         .padding()
     }

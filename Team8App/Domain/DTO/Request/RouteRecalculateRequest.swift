@@ -38,18 +38,16 @@ extension RecalculateRouteRequest: Codable {
 struct RouteRecalculateRequest: Codable {
     let proposalId: String
     let currentLocation: Location
-    let destinationLocation: Location?
+    let destination: Location?  // APIに合わせて"destination"に変更
     let mode: WalkMode
     let visitedPois: VisitedPois
-    let realtimeContext: RealtimeContext
     
     enum CodingKeys: String, CodingKey {
         case proposalId = "proposal_id"
         case currentLocation = "current_location"
-        case destinationLocation = "destination_location"
+        case destination = "destination"  // APIフィールド名に合わせる
         case mode
         case visitedPois = "visited_pois"
-        case realtimeContext = "realtime_context"
     }
 }
 

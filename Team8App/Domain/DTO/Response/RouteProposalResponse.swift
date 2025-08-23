@@ -5,15 +5,15 @@ struct RouteProposalResponse: ResponseProtocol {
 }
 
 struct RouteProposal: Codable {
-    let proposalId: String
+    let proposalId: String?  // 一時的にオプショナルに変更
     let title: String
-    let estimatedDurationMinutes: Int
-    let estimatedDistanceMeters: Int
-    let theme: String
-    let displayHighlights: [String]
-    let navigationSteps: [NavigationStep]
-    let routePolyline: String
-    let generatedStory: String
+    let estimatedDurationMinutes: Int?  // オプショナルに変更
+    let estimatedDistanceMeters: Int?   // オプショナルに変更
+    let theme: String?  // オプショナルに変更
+    let displayHighlights: [String]?  // オプショナルに変更
+    let navigationSteps: [NavigationStep]?  // オプショナルに変更
+    let routePolyline: String?  // オプショナルに変更
+    let generatedStory: String?  // オプショナルに変更
     
     enum CodingKeys: String, CodingKey {
         case proposalId = "proposal_id"

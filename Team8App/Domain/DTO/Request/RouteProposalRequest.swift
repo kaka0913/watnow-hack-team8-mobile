@@ -37,18 +37,16 @@ extension GenerateRouteProposalsRequest: Codable {
 
 struct RouteProposalRequest: Codable {
     let startLocation: Location
-    let destinationLocation: Location?
+    let destination: Location?  // APIに合わせて"destination"に変更
     let mode: WalkMode
-    let timeMinutes: Int?
+    let durationMinutes: Int?   // APIに合わせて"duration_minutes"に変更
     let theme: String
-    let realtimeContext: RealtimeContext
     
     enum CodingKeys: String, CodingKey {
         case startLocation = "start_location"
-        case destinationLocation = "destination_location"
+        case destination = "destination"  // APIフィールド名に合わせる
         case mode, theme
-        case timeMinutes = "time_minutes"
-        case realtimeContext = "realtime_context"
+        case durationMinutes = "duration_minutes"  // APIフィールド名に合わせる
     }
 }
 

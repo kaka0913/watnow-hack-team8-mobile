@@ -58,6 +58,12 @@ class APIClient {
                     let statusCode = response.response?.statusCode ?? -1
                     switch response.result {
                     case .success(let result):
+                        // デバッグ用：成功レスポンスをログ出力
+                        if let data = response.data, let jsonString = String(data: data, encoding: .utf8) {
+                            print("✅ APIレスポンス成功:")
+                            print("Status Code: \(statusCode)")
+                            print("Response Body: \(jsonString)")
+                        }
                         continuation.resume(returning: result)
                     case .failure(let error):
                         let data = response.data

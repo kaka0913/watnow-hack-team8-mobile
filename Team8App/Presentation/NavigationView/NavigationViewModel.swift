@@ -15,6 +15,7 @@ class NavigationViewModel: NSObject {
     // MARK: - Properties
     var isLoading: Bool = false
     var errorMessage: String?
+    var showRouteUpdateCompleteDialog: Bool = false
     
     // MARK: - Navigation Properties
     var showWalkSummary: Bool = false
@@ -70,15 +71,41 @@ class NavigationViewModel: NSObject {
     
     @MainActor
     func recalculateRoute() async {
-        guard let proposalId = currentProposalId,
-              let currentLoc = currentLocation else {
-            print("❌ ルート再計算に必要な情報が不足しています")
-            return
+        print("🔍 ルート再計算前の状態確認:")
+        print("   - currentProposalId: \(currentProposalId ?? "nil")")
+        print("   - currentDestination: \(currentDestination?.latitude ?? 0), \(currentDestination?.longitude ?? 0)")
+        
+        // currentProposalIdの取得またはUserDefaultsからの復元
+        let proposalId: String
+        if let currentId = currentProposalId {
+            proposalId = currentId
+        } else {
+            print("❌ currentProposalIdが設定されていません")
+            // UserDefaultsから再取得を試行
+            if let savedProposalId = UserDefaults.standard.string(forKey: "currentProposalId") {
+                print("🔄 UserDefaultsからproposalIdを復元: \(savedProposalId)")
+                currentProposalId = savedProposalId
+                proposalId = savedProposalId
+            } else {
+                print("❌ UserDefaultsからもproposalIdが見つかりません")
+                errorMessage = "ルート情報が見つかりません。再度ルート選択してください。"
+                return
+            }
+        }
+        
+        // 現在地が取得できていない場合は、固定の現在地を使用
+        let currentLoc: CLLocationCoordinate2D
+        if let location = currentLocation {
+            currentLoc = location
+        } else {
+            print("⚠️ 現在地が取得できていないため、固定座標を使用")
+            currentLoc = CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681) // 京都市内の座標
+            currentLocation = currentLoc
         }
         
         isLoading = true
         errorMessage = nil
-        defer { isLoading = false }
+        showRouteUpdateCompleteDialog = false
         
         do {
             print("🔄 ルート再計算開始")
@@ -118,13 +145,16 @@ class NavigationViewModel: NSObject {
             print("   - 推定距離: \(response.updatedRoute.estimatedDistanceMeters)m")
             print("   - ハイライト: \(response.updatedRoute.highlights.joined(separator: ", "))")
             print("   - ストーリー: \(response.updatedRoute.generatedStory)")
-
-            currentStoryText = response.updatedRoute.generatedStory
+            
+            // 完了ダイアログを表示
+            showRouteUpdateCompleteDialog = true
             
         } catch {
             print("❌ ルート再計算に失敗しました: \(error)")
             errorMessage = "新しいルートの計算に失敗しました"
         }
+        
+        isLoading = false
     }
     
     // MARK: - Private Methods
@@ -143,6 +173,9 @@ class NavigationViewModel: NSObject {
         
         // TODO: routePolylineから実際の座標配列を生成する実装が必要
         // 現在はサンプル座標を使用（将来的にはroutePolylineをパースして座標配列に変換）
+        
+        // ルートタイトルを更新（再計算後の新しいタイトル）
+        routeTitle = newRoute.title
         
         // 残り時間と距離を更新（APIからの実際の値を使用）
         remainingTime = "残り\(newRoute.estimatedDurationMinutes)分"
@@ -163,13 +196,36 @@ class NavigationViewModel: NSObject {
             )
         }
         
+        // UserDefaultsにも更新された情報を保存
+        updateUserDefaultsWithRecalculatedRoute(newRoute)
+        
         print("📍 ルート情報をAPIレスポンスで更新しました:")
-        print("   - タイトル: \(newRoute.title)")
+        print("   - 新タイトル: \(newRoute.title)")
         print("   - 推定時間: \(newRoute.estimatedDurationMinutes)分")
         print("   - 推定距離: \(newRoute.estimatedDistanceMeters)m")
         print("   - ハイライト数: \(newRoute.highlights.count)")
         print("   - ストーリー長: \(newRoute.generatedStory.count)文字")
         print("   - ルートステップ数: \(routeSteps.count)")
+        print("✨ NavigationView UI更新完了")
+    }
+    
+    private func updateUserDefaultsWithRecalculatedRoute(_ route: UpdatedRoute) {
+        // 再計算されたルート情報をUserDefaultsに保存
+        let userDefaults = UserDefaults.standard
+        
+        userDefaults.set(route.title, forKey: "currentRouteTitle")
+        userDefaults.set(route.estimatedDurationMinutes, forKey: "currentRouteActualDuration")
+        userDefaults.set(route.estimatedDistanceMeters, forKey: "currentRouteActualDistance")
+        userDefaults.set(route.generatedStory, forKey: "currentRouteStory")
+        userDefaults.set(route.routePolyline, forKey: "currentRoutePolyline")
+        
+        // ハイライトを保存
+        let highlightsData = try? JSONEncoder().encode(route.highlights)
+        userDefaults.set(highlightsData, forKey: "currentRouteHighlights")
+        
+        userDefaults.synchronize()
+        
+        print("💾 再計算されたルート情報をUserDefaultsに保存完了")
     }
     
     private func calculateStepDistance(for index: Int, totalDistance: Int) -> String {
@@ -183,12 +239,21 @@ class NavigationViewModel: NSObject {
     func setSelectedRoute(_ route: StoryRoute) {
         // 選択されたルートの情報を保存
         currentProposalId = route.id
-        // TODO: StoryRouteからLocationを取得する方法を実装
-        currentDestination = nil // 実際の実装では適切な値を設定
+        
+        // DestinationSettingViewModelから目的地座標を復元
+        // （DestinationSettingViewModelで使用された座標と同じ値を使用）
+        currentDestination = Location(
+            latitude: 34.9735, // DestinationSettingViewModelと同じ座標
+            longitude: 135.7582
+        )
         currentMode = .destination
         
         // ルートタイトルを設定
         routeTitle = route.title
+        
+        // 位置情報の取得を開始（recalculateRouteで現在地が必要なため）
+        requestLocationPermission()
+        locationManager.startUpdatingLocation()
         
         // UserDefaultsに保存
         let userDefaults = UserDefaults.standard
@@ -200,6 +265,12 @@ class NavigationViewModel: NSObject {
         
         // WalkModeを文字列として保存
         userDefaults.set("destination", forKey: "currentWalkMode")
+        
+        // 目的地座標を保存
+        if let destination = currentDestination {
+            userDefaults.set(destination.latitude, forKey: "currentDestinationLatitude")
+            userDefaults.set(destination.longitude, forKey: "currentDestinationLongitude")
+        }
         
         // 保存を確実に実行
         userDefaults.synchronize()
@@ -256,6 +327,13 @@ class NavigationViewModel: NSObject {
             // WalkModeを復元
             currentMode = savedMode == "timeBased" ? .timeBased : .destination
             
+            // 目的地座標を復元
+            let destinationLat = userDefaults.double(forKey: "currentDestinationLatitude")
+            let destinationLon = userDefaults.double(forKey: "currentDestinationLongitude")
+            if destinationLat != 0 && destinationLon != 0 {
+                currentDestination = Location(latitude: destinationLat, longitude: destinationLon)
+            }
+            
             print("📱 UserDefaultsから実際のAPIデータを復元:")
             print("   - ID: \(savedProposalId)")
             print("   - タイトル: \(savedTitle)")
@@ -300,6 +378,10 @@ class NavigationViewModel: NSObject {
         userDefaults.removeObject(forKey: "currentRoutePolyline")
         userDefaults.removeObject(forKey: "currentRouteActualDuration")
         userDefaults.removeObject(forKey: "currentRouteActualDistance")
+        
+        // 目的地座標も削除
+        userDefaults.removeObject(forKey: "currentDestinationLatitude")
+        userDefaults.removeObject(forKey: "currentDestinationLongitude")
         
         userDefaults.synchronize()
         

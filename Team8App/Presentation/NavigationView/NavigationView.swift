@@ -150,28 +150,28 @@ struct NavigationView: View {
                         
                         // ボトムシートコンテンツ
                         VStack(spacing: 16) {
-                            // 道のりセクション
+                    // 道のりセクション
                             RouteStepsView(steps: viewModel.routeSteps, storyText: viewModel.currentStoryText)
                                 .frame(maxHeight: isBottomSheetExpanded ? .infinity : 0)
                                 .clipped()
-                            
-                            // 散歩終了ボタン
-                            Button(action: {
-                                viewModel.finishWalk()
-                            }) {
-                                HStack {
-                                    Text("散歩を終了する")
-                                }
-                                .foregroundColor(.white)
-                                .font(.system(size: 18, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.gray.opacity(0.8))
-                                .cornerRadius(12)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 32)
+                    
+                    // 散歩終了ボタン
+                    Button(action: {
+                        viewModel.finishWalk()
+                    }) {
+                        HStack {
+                            Text("散歩を終了する")
                         }
+                        .foregroundColor(.white)
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.gray.opacity(0.8))
+                        .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 32)
+                }
                     }
                     .frame(height: isBottomSheetExpanded ? expandedHeight : collapsedHeight)
                     .background(Color(.systemBackground))
@@ -189,8 +189,22 @@ struct NavigationView: View {
                     onRecalculateRoute: {
                         Task {
                             await viewModel.recalculateRoute()
+                            // ダイアログを閉じる
+                            await MainActor.run {
+                                showRouteDeviationDialog = false
+                            }
                         }
                     }
+                )
+            }
+            
+            if viewModel.isLoading {
+                LoadingOverlay()
+            }
+            
+            if viewModel.showRouteUpdateCompleteDialog {
+                RouteUpdateCompleteDialog(
+                    isPresented: $viewModel.showRouteUpdateCompleteDialog
                 )
             }
         }
@@ -207,5 +221,93 @@ struct NavigationView: View {
         .navigationDestination(isPresented: $viewModel.showWalkSummary) {
             WalkSummaryView()
         }
+    }
+}
+
+// MARK: - LoadingOverlay
+struct LoadingOverlay: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                
+                Text("新しいルートを計算中...")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            .padding(40)
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(16)
+        }
+        .animation(.easeInOut(duration: 0.3), value: true)
+    }
+}
+
+// MARK: - RouteUpdateCompleteDialog
+struct RouteUpdateCompleteDialog: View {
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        isPresented = false
+                    }
+                }
+            
+            VStack(spacing: 24) {
+                // アイコンとタイトル
+                VStack(spacing: 16) {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 60, height: 60)
+                        .overlay {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    
+                    Text("ルート更新完了！")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                }
+                
+                // メッセージ
+                Text("新しいルートに更新されました。\n引き続き散歩をお楽しみください。")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                
+                // 確認ボタン
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        isPresented = false
+                    }
+                }) {
+                    Text("続ける")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(.blue)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(32)
+            .background(Color(.systemBackground))
+            .cornerRadius(20)
+            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 32)
+        }
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isPresented)
     }
 }

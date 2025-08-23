@@ -71,7 +71,10 @@ struct NavigationView: View {
                     MapContainerView(
                         region: $viewModel.mapRegion,
                         routeCoordinates: $viewModel.routeCoordinates,
-                        annotations: $viewModel.annotations
+                        annotations: $viewModel.annotations,
+                        onLocationUpdate: { coordinate in
+                            viewModel.currentLocation = coordinate
+                        }
                     )
                     .clipped() // 地図の境界を明確にする
                     .overlay(

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StoryRouteView: View {
-    @State private var viewModel = StoryRouteViewModel()
+    @State private var viewModel = StoryRouteViewModel.shared
     
     var body: some View {
     
@@ -15,10 +15,11 @@ struct StoryRouteView: View {
                     } else if let errorMessage = viewModel.errorMessage {
                         errorView(errorMessage)
                     } else {
-                        ForEach(viewModel.storyRoutes) { route in
+                        let displayProposals = viewModel.routeProposals.isEmpty ? viewModel.getMockRouteProposals() : viewModel.routeProposals
+                        ForEach(displayProposals, id: \.proposalId) { proposal in
                             StoryRouteCard(
-                                route: route,
-                                onStartRoute: { viewModel.startRoute(route) }
+                                route: convertToStoryRoute(proposal),
+                                onStartRoute: { viewModel.startRoute(convertToStoryRoute(proposal)) }
                             )
                         }
                     }
@@ -49,6 +50,7 @@ struct StoryRouteView: View {
                     }
                 }
             }
+
         }
     }
     
@@ -76,8 +78,30 @@ struct StoryRouteView: View {
         }
         .padding()
     }
+    
+    private func convertToStoryRoute(_ proposal: RouteProposal) -> StoryRoute {
+        return StoryRoute(
+            id: proposal.proposalId ?? UUID().uuidString,
+            title: proposal.title,
+            description: proposal.generatedStory ?? "素晴らしい散歩ルートです",
+            duration: proposal.estimatedDurationMinutes ?? 60,
+            distance: Double(proposal.estimatedDistanceMeters ?? 2000) / 1000.0, // メートルをキロメートルに変換
+            category: mapThemeToCategory(proposal.theme ?? "gourmet"),
+            iconColor: .orange,
+            highlights: (proposal.displayHighlights ?? []).map { 
+                RouteHighlight(name: $0, iconColor: "orange") 
+            }
+        )
+    }
+    
+    private func mapThemeToCategory(_ theme: String) -> StoryRoute.RouteCategory {
+        switch theme {
+        case "nature":
+            return .nature
+        case "culture", "art":
+            return .art
+        default:
+            return .gourmet
+        }
+    }
 
-
-#Preview {
-    StoryRouteView()
-}

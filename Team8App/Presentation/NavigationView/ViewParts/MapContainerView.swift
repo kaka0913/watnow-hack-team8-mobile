@@ -46,9 +46,8 @@ struct MapContainerView: View {
             // ズームコントロールボタン
             VStack {
                 HStack {
-                    Spacer()
-                    VStack(spacing: 8) {
-                        // ズームイン
+                    // 左上：ズームアウトボタン
+                    VStack {
                         Button(action: {
                             zoomIn()
                         }) {
@@ -60,8 +59,6 @@ struct MapContainerView: View {
                                 .cornerRadius(8)
                                 .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                         }
-                        
-                        // ズームアウト
                         Button(action: {
                             zoomOut()
                         }) {
@@ -73,10 +70,13 @@ struct MapContainerView: View {
                                 .cornerRadius(8)
                                 .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                         }
-                        
                         Spacer()
                     }
-                    .padding(.trailing, 12)
+                    .padding(.leading, 12)
+                    
+                    Spacer()
+                    
+                    .padding(.trailing, 60) // ハチボタンのスペースを確保
                 }
                 Spacer()
             }

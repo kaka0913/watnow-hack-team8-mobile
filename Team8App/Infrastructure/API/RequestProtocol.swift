@@ -22,7 +22,7 @@ protocol RequestProtocol: Encodable {
 
 extension RequestProtocol {
     var baseUrl: String {
-        return "https://dev-app-server-jjzkmybl3q-an.a.run.app"
+        return "https://dev-app-server-841104676464.asia-northeast1.run.app"
     }
     var encoding: Alamofire.ParameterEncoding {
         return JSONEncoding.default

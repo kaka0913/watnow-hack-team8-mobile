@@ -14,7 +14,7 @@ struct WalkSummaryView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 1.0, green: 1.0,blue: 0.95)
+            Color(red: 1.0, green: 1.0,blue: 0.90)
                 .ignoresSafeArea()
             
             
@@ -23,7 +23,9 @@ struct WalkSummaryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 VStack {
                     // Header section
-                    HeaderView(onDismiss: { viewModel.dismiss() })
+                    HeaderView(onDismiss: {
+                        dismiss()
+                    })
                     
                     // Walk Summary Card
                     WalkSummaryCard(viewModel: viewModel)
@@ -46,7 +48,7 @@ struct WalkSummaryView: View {
         }
     }
 }
-    #Preview {
-        WalkSummaryView()
-    }
 
+#Preview {
+    WalkSummaryView()
+}

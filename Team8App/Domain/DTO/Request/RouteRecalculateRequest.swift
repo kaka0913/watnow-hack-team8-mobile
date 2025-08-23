@@ -42,30 +42,16 @@ struct RouteRecalculateRequest: Codable {
     let mode: WalkMode
     let visitedPois: VisitedPois
     
-    enum CodingKeys: String, CodingKey {
-        case proposalId = "proposal_id"
-        case currentLocation = "current_location"
-        case destination = "destination"  // APIフィールド名に合わせる
-        case mode
-        case visitedPois = "visited_pois"
-    }
 }
 
 struct VisitedPois: Codable {
     let previousPois: [VisitedPoi]
     
-    enum CodingKeys: String, CodingKey {
-        case previousPois = "previous_pois"
-    }
 }
 
 struct VisitedPoi: Codable {
     let name: String
     let poiId: String
     
-    enum CodingKeys: String, CodingKey {
-        case name
-        case poiId = "poi_id"
-    }
 }
 

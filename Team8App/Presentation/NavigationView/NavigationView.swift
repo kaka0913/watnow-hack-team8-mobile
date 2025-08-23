@@ -38,6 +38,9 @@ struct NavigationView: View {
     @State private var bottomSheetOffset: CGFloat = 0
     @State private var isBottomSheetExpanded: Bool = true
     
+    // ルート逸脱ダイアログの状態管理
+    @State private var showRouteDeviationDialog: Bool = false
+    
     init(selectedRoute: StoryRoute? = nil) {
         self.selectedRoute = selectedRoute
     }
@@ -76,7 +79,9 @@ struct NavigationView: View {
                         VStack {
                             HStack {
                                 Spacer()
-                                HoneyBeeIcon()
+                                HoneyBeeIcon(onTap: {
+                                    showRouteDeviationDialog = true
+                                })
                                     .padding(.trailing, 16)
                                     .padding(.top, 16)
                             }
@@ -174,6 +179,11 @@ struct NavigationView: View {
                     .offset(y: bottomSheetOffset)
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isBottomSheetExpanded)
                 }
+            }
+            
+            // ルート逸脱ダイアログオーバーレイ
+            if showRouteDeviationDialog {
+                RouteDeviationDialog(isPresented: $showRouteDeviationDialog)
             }
         }
         .navigationBarHidden(true)

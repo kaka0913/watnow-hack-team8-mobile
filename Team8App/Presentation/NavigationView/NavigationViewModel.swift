@@ -95,14 +95,16 @@ class NavigationViewModel: NSObject {
             }
         }
         
-        // 現在地が取得できていない場合は、固定の現在地を使用
+        // 現在地が取得できていない場合は、LocationManagerから取得を試行
         let currentLoc: CLLocationCoordinate2D
         if let location = currentLocation {
             currentLoc = location
         } else {
-            print("⚠️ 現在地が取得できていないため、固定座標を使用")
-            currentLoc = CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681) // 京都市内の座標
-            currentLocation = currentLoc
+            print("⚠️ 現在地が取得できていないため、LocationManagerから取得を試行")
+            // LocationManagerから現在地を取得
+            let realLocation = await LocationManager.shared.getCurrentLocation()
+            currentLoc = realLocation
+            currentLocation = realLocation
         }
         
         isLoading = true

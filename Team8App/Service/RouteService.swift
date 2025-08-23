@@ -108,8 +108,8 @@ extension RouteService {
         timeMinutes: Int? = nil
     ) async throws -> RouteProposalResponse {
         
-        // TODO: 実際の現在地取得を実装（ここではダミー座標）
-        let currentLocation = Location(latitude: 35.0116, longitude: 135.7681)
+        // 実際の現在地を取得
+        let currentLocation = await LocationManager.shared.getCurrentLocationAsLocation()
         
         let mode: WalkMode = destinationLocation != nil ? .destination : .timeBased
         

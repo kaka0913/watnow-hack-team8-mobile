@@ -42,6 +42,11 @@ class NavigationViewModel: NSObject {
     var currentMode: WalkMode = .destination
     var visitedPois: [VisitedPoi] = []
     
+    // MARK: - Route Deviation Properties
+    var showRouteDeviationDialog: Bool = false
+    private let routeDeviationThreshold: Double = 250.0 // 250m
+    private var isTrackingRoute: Bool = false
+    
     // MARK: - Services
     private let locationManager = CLLocationManager()
     private let routeService = RouteService.shared
@@ -51,6 +56,7 @@ class NavigationViewModel: NSObject {
         super.init()
         setupLocationManager()
         loadSavedRoute()
+        startRouteTracking()
     }
     
     // MARK: - Methods
@@ -63,10 +69,16 @@ class NavigationViewModel: NSObject {
         
         // 位置情報の取得を開始
         requestLocationPermission()
+        
+        // ルート追跡を開始
+        isTrackingRoute = true
+        startRouteTracking()
     }
     
     func finishWalk() {
         print("散歩を終了します")
+        isTrackingRoute = false
+        LocationManager.shared.stopLocationUpdates()
         clearSavedRoute() // 散歩終了時にルート情報をクリア
         showWalkSummary = true
     }
@@ -451,6 +463,9 @@ extension NavigationViewModel: CLLocationManagerDelegate {
         
         currentLocation = location.coordinate
         mapRegion.center = location.coordinate
+        
+        // ルート逸脱チェックを実行
+        checkRouteDeviation()
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -509,5 +524,116 @@ extension NavigationViewModel {
             )
             annotations.append(endAnnotation)
         }
+    }
+    
+    // MARK: - Route Tracking Methods
+
+    private func startRouteTracking() {
+        // LocationManagerから位置情報の更新を監視
+        LocationManager.shared.startLocationUpdates()
+        
+        // 定期的にルート逸脱チェックを実行
+        Task {
+            while isTrackingRoute {
+                try await Task.sleep(nanoseconds: 5_000_000_000)//TODO: テストの値なので後で伸ばす
+                checkRouteDeviation()
+            }
+        }
+    }
+    
+    private func checkRouteDeviation() {
+        guard isTrackingRoute,
+              let currentLocation = LocationManager.shared.currentLocation,
+              !routeCoordinates.isEmpty else { return }
+        
+        let currentCoordinate = currentLocation
+        let distanceToRoute = distanceFromCurrentLocationToRoute(currentCoordinate)
+        
+        print("📍 現在位置からルートまでの距離: \(Int(distanceToRoute))m")
+        
+        if distanceToRoute > routeDeviationThreshold && !showRouteDeviationDialog {
+            print("⚠️ ルートから\(Int(distanceToRoute))m離れています（閾値: \(Int(routeDeviationThreshold))m）")
+            DispatchQueue.main.async {
+                self.showRouteDeviationDialog = true
+            }
+        }
+    }
+    
+    private func distanceFromCurrentLocationToRoute(_ currentLocation: CLLocationCoordinate2D) -> Double {
+        guard !routeCoordinates.isEmpty else { return 0.0 }
+        
+        var minDistance = Double.infinity
+        
+        // ルート上の各ポイントとの距離を計算
+        for routePoint in routeCoordinates {
+            let distance = calculateDistance(from: currentLocation, to: routePoint)
+            if distance < minDistance {
+                minDistance = distance
+            }
+        }
+        
+        // ルート上の線分との距離も計算（より正確な距離計算）
+        for i in 0..<(routeCoordinates.count - 1) {
+            let segmentStart = routeCoordinates[i]
+            let segmentEnd = routeCoordinates[i + 1]
+            let distanceToSegment = distanceFromPointToLineSegment(
+                point: currentLocation,
+                lineStart: segmentStart,
+                lineEnd: segmentEnd
+            )
+            if distanceToSegment < minDistance {
+                minDistance = distanceToSegment
+            }
+        }
+        
+        return minDistance
+    }
+    
+    private func calculateDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> Double {
+        let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
+        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+        return fromLocation.distance(from: toLocation)
+    }
+    
+    private func distanceFromPointToLineSegment(
+        point: CLLocationCoordinate2D,
+        lineStart: CLLocationCoordinate2D,
+        lineEnd: CLLocationCoordinate2D
+    ) -> Double {
+        let A = point
+        let B = lineStart
+        let C = lineEnd
+        
+        // ベクトルBC
+        let BC_x = C.longitude - B.longitude
+        let BC_y = C.latitude - B.latitude
+        
+        // ベクトルBA
+        let BA_x = A.longitude - B.longitude
+        let BA_y = A.latitude - B.latitude
+        
+        // 内積を計算
+        let dot = BC_x * BA_x + BC_y * BA_y
+        let lenSq = BC_x * BC_x + BC_y * BC_y
+        
+        var param = -1.0
+        if lenSq != 0 {
+            param = dot / lenSq
+        }
+        
+        var closestPoint: CLLocationCoordinate2D
+        
+        if param < 0 {
+            closestPoint = lineStart
+        } else if param > 1 {
+            closestPoint = lineEnd
+        } else {
+            closestPoint = CLLocationCoordinate2D(
+                latitude: lineStart.latitude + param * (lineEnd.latitude - lineStart.latitude),
+                longitude: lineStart.longitude + param * (lineEnd.longitude - lineStart.longitude)
+            )
+        }
+        
+        return calculateDistance(from: point, to: closestPoint)
     }
 }

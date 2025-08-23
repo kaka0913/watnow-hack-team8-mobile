@@ -14,22 +14,9 @@
 		2220AB6A2E35DF4E000E144A /* Team8App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Team8App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CE815B582E40B3D2004F9AA6 /* Exceptions for "Team8App" folder in "Team8App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Service/.gitkeep,
-			);
-			target = 2220AB692E35DF4E000E144A /* Team8App */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2220AB6C2E35DF4E000E144A /* Team8App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CE815B582E40B3D2004F9AA6 /* Exceptions for "Team8App" folder in "Team8App" target */,
-			);
 			path = Team8App;
 			sourceTree = "<group>";
 		};

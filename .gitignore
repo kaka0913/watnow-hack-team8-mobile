@@ -5,6 +5,8 @@ build/
 ## 個人設定
 xcuserdata/
 
+.serena/
+
 ## ワークスペース設定
 *.xcworkspace/xcuserdata/
 *.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings

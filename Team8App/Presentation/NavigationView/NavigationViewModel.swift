@@ -34,9 +34,14 @@ class NavigationViewModel: NSObject {
     
     // MARK: - Route Steps Properties
     var routeSteps: [RouteStep] = []
+    var currentProposalId: String?
+    var currentDestination: Location?
+    var currentMode: WalkMode = .destination
+    var visitedPois: [VisitedPoi] = []
     
     // MARK: - Services
     private let locationManager = CLLocationManager()
+    private let routeService = RouteService.shared
     
     // MARK: - Initialization
     override init() {
@@ -63,6 +68,50 @@ class NavigationViewModel: NSObject {
     func finishWalk() {
         print("散歩を終了します")
         showWalkSummary = true
+    }
+    
+    @MainActor
+    func recalculateRoute() async {
+        guard let proposalId = currentProposalId,
+              let currentLoc = currentLocation else {
+            print("❌ ルート再計算に必要な情報が不足しています")
+            return
+        }
+        
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        
+        do {
+            print("🔄 ルート再計算開始")
+            print("提案ID: \(proposalId)")
+            print("現在地: \(currentLoc)")
+            print("目的地: \(currentDestination?.latitude ?? 0), \(currentDestination?.longitude ?? 0)")
+            
+            let currentLocationData = Location(
+                latitude: currentLoc.latitude,
+                longitude: currentLoc.longitude
+            )
+            
+            let response = try await routeService.recalculateRoute(
+                proposalId: proposalId,
+                currentLocation: currentLocationData,
+                destinationLocation: currentDestination,
+                mode: currentMode,
+                visitedPois: visitedPois,
+                weather: "sunny", // TODO: 実際の天気を取得
+                timeOfDay: "afternoon" // TODO: 実際の時間帯を取得
+            )
+            
+            // 新しいルート情報で更新
+            updateRouteFromRecalculation(response)
+            
+            print("✅ ルート再計算成功")
+            
+        } catch {
+            print("❌ ルート再計算に失敗しました: \(error)")
+            errorMessage = "新しいルートの計算に失敗しました"
+        }
     }
     
     // MARK: - Private Methods
@@ -127,6 +176,51 @@ class NavigationViewModel: NSObject {
         // 現在地の情報を更新
         currentLocationName = "商店街入口付近"
         currentStoryText = "背景の蜜蜂が紡ぐ、古き良き商店街の物語"
+    }
+    
+    private func updateRouteFromRecalculation(_ response: RouteRecalculateResponse) {
+        // 再計算されたルート情報でViewModelを更新
+        let newRoute = response.updatedRoute
+        
+        // TODO: routePolylineから実際の座標配列を生成する実装が必要
+        // 現在はサンプル座標を使用
+        generateSampleRoute()
+        
+        // 残り時間と距離を更新
+        remainingTime = "残り\(newRoute.estimatedDurationMinutes)分"
+        remainingDistance = String(format: "%.1fkm", Double(newRoute.estimatedDistanceMeters) / 1000.0)
+        
+        // ストーリーテキストを更新
+        currentStoryText = newRoute.generatedStory
+        
+        // ハイライト情報を使って新しいルートステップを生成
+        routeSteps = newRoute.highlights.enumerated().map { index, highlight in
+            RouteStep(
+                stepNumber: index + 1,
+                description: highlight,
+                distance: "\(200 + index * 150)m", // サンプル距離
+                isCompleted: false,
+                stepType: index == 0 ? .current : .upcoming
+            )
+        }
+        
+        print("📍 ルート情報を更新しました:")
+        print("   - タイトル: \(newRoute.title)")
+        print("   - 推定時間: \(newRoute.estimatedDurationMinutes)分")
+        print("   - 推定距離: \(newRoute.estimatedDistanceMeters)m")
+        print("   - ハイライト数: \(newRoute.highlights.count)")
+    }
+    
+    func setSelectedRoute(_ route: StoryRoute) {
+        // 選択されたルートの情報を保存
+        currentProposalId = route.id
+        // TODO: StoryRouteからLocationを取得する方法を実装
+        currentDestination = nil // 実際の実装では適切な値を設定
+        currentMode = .destination
+        
+        print("📍 選択されたルート情報を保存:")
+        print("   - ID: \(route.id)")
+        print("   - タイトル: \(route.title)")
     }
 }
 

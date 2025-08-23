@@ -39,6 +39,7 @@ struct HoneyBeeIcon: View {
 
 struct RouteDeviationDialog: View {
     @Binding var isPresented: Bool
+    let onRecalculateRoute: (() -> Void)?
     
     var body: some View {
         ZStack {
@@ -94,6 +95,7 @@ struct RouteDeviationDialog: View {
                     // メインボタン（新しいルートで進む）
                     Button(action: {
                         print("新しいルートで進むが選択されました")
+                        onRecalculateRoute?()
                         withAnimation(.easeOut(duration: 0.3)) {
                             isPresented = false
                         }

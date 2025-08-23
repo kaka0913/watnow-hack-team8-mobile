@@ -183,14 +183,21 @@ struct NavigationView: View {
             
             // ルート逸脱ダイアログオーバーレイ
             if showRouteDeviationDialog {
-                RouteDeviationDialog(isPresented: $showRouteDeviationDialog)
+                RouteDeviationDialog(
+                    isPresented: $showRouteDeviationDialog,
+                    onRecalculateRoute: {
+                        Task {
+                            await viewModel.recalculateRoute()
+                        }
+                    }
+                )
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             if let route = selectedRoute {
                 print("🗺 NavigationView表示: \(route.title)")
-                // TODO: viewModel.setSelectedRoute(route)
+                viewModel.setSelectedRoute(route)
             }
             Task {
                 await viewModel.startNavigation()

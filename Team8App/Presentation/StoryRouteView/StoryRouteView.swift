@@ -24,6 +24,10 @@ struct StoryRouteView: View {
                                 onStartRoute: { 
                                     let route = convertToStoryRoute(proposal)
                                     selectedRoute = route
+                                    
+                                    // UserDefaultsに保存
+                                    saveRouteToUserDefaults(route)
+                                    
                                     showNavigationView = true
                                     viewModel.startRoute(route)
                                 }
@@ -110,5 +114,28 @@ struct StoryRouteView: View {
         default:
             return .gourmet
         }
+    }
+    
+    private func saveRouteToUserDefaults(_ route: StoryRoute) {
+        // UserDefaultsに選択されたルート情報を保存
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(route.id, forKey: "currentProposalId")
+        userDefaults.set(route.title, forKey: "currentRouteTitle")
+        userDefaults.set(route.duration, forKey: "currentRouteDuration")
+        userDefaults.set(route.distance, forKey: "currentRouteDistance")
+        userDefaults.set(route.description, forKey: "currentRouteDescription")
+        
+        // WalkModeを文字列として保存
+        userDefaults.set("destination", forKey: "currentWalkMode")
+        
+        // 保存を確実に実行
+        userDefaults.synchronize()
+        
+        print("📍 StoryRouteViewでルート情報を保存:")
+        print("   - ID: \(route.id)")
+        print("   - タイトル: \(route.title)")
+        print("   - 時間: \(route.duration)分")
+        print("   - 距離: \(route.distance)km")
+        print("💾 UserDefaultsに保存完了")
     }
 

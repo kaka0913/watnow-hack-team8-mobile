@@ -48,6 +48,7 @@ class NavigationViewModel: NSObject {
         super.init()
         setupLocationManager()
         setupSampleData()
+        loadSavedRoute()
     }
     
     // MARK: - Methods
@@ -67,6 +68,7 @@ class NavigationViewModel: NSObject {
     
     func finishWalk() {
         print("散歩を終了します")
+        clearSavedRoute() // 散歩終了時にルート情報をクリア
         showWalkSummary = true
     }
     
@@ -218,9 +220,68 @@ class NavigationViewModel: NSObject {
         currentDestination = nil // 実際の実装では適切な値を設定
         currentMode = .destination
         
+        // UserDefaultsに保存
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(route.id, forKey: "currentProposalId")
+        userDefaults.set(route.title, forKey: "currentRouteTitle")
+        userDefaults.set(route.duration, forKey: "currentRouteDuration")
+        userDefaults.set(route.distance, forKey: "currentRouteDistance")
+        userDefaults.set(route.description, forKey: "currentRouteDescription")
+        
+        // WalkModeを文字列として保存
+        userDefaults.set("destination", forKey: "currentWalkMode")
+        
+        // 保存を確実に実行
+        userDefaults.synchronize()
+        
         print("📍 選択されたルート情報を保存:")
         print("   - ID: \(route.id)")
         print("   - タイトル: \(route.title)")
+        print("   - 時間: \(route.duration)分")
+        print("   - 距離: \(route.distance)km")
+        print("💾 UserDefaultsに保存完了")
+    }
+    
+    func loadSavedRoute() {
+        // UserDefaultsから保存されたルート情報を復元
+        let userDefaults = UserDefaults.standard
+        
+        if let savedProposalId = userDefaults.string(forKey: "currentProposalId") {
+            currentProposalId = savedProposalId
+            
+            // その他の保存された情報も復元
+            let savedTitle = userDefaults.string(forKey: "currentRouteTitle") ?? ""
+            let savedDuration = userDefaults.integer(forKey: "currentRouteDuration")
+            let savedDistance = userDefaults.double(forKey: "currentRouteDistance")
+            let savedDescription = userDefaults.string(forKey: "currentRouteDescription") ?? ""
+            let savedMode = userDefaults.string(forKey: "currentWalkMode") ?? "destination"
+            
+            // WalkModeを復元
+            currentMode = savedMode == "timeBased" ? .timeBased : .destination
+            
+            print("📱 UserDefaultsからルート情報を復元:")
+            print("   - ID: \(savedProposalId)")
+            print("   - タイトル: \(savedTitle)")
+            print("   - 時間: \(savedDuration)分")
+            print("   - 距離: \(savedDistance)km")
+            print("   - モード: \(savedMode)")
+        } else {
+            print("📱 保存されたルート情報が見つかりませんでした")
+        }
+    }
+    
+    func clearSavedRoute() {
+        // UserDefaultsから保存されたルート情報を削除
+        let userDefaults = UserDefaults.standard
+        userDefaults.removeObject(forKey: "currentProposalId")
+        userDefaults.removeObject(forKey: "currentRouteTitle")
+        userDefaults.removeObject(forKey: "currentRouteDuration")
+        userDefaults.removeObject(forKey: "currentRouteDistance")
+        userDefaults.removeObject(forKey: "currentRouteDescription")
+        userDefaults.removeObject(forKey: "currentWalkMode")
+        userDefaults.synchronize()
+        
+        print("🗑 UserDefaultsからルート情報を削除しました")
     }
 }
 

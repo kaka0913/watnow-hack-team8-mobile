@@ -38,7 +38,7 @@ struct HomeView: View {
             .navigationDestination(for: String.self) { destination in
                 switch destination {
                 case "DestinationWalk":
-                    DestinationWalkView()
+                    DestinationSettingView()
                 case "FreeWalk":
                     FreeWalkView()
                 case "HoneycombMap":

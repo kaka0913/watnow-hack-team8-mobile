@@ -67,7 +67,7 @@ struct ThemeSelectionSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List(themes, id: \.self) { theme in
                 Button(action: {
                     onSelect(theme)
@@ -94,14 +94,4 @@ struct ThemeSelectionSheet: View {
             }
         }
     }
-}
-
-#Preview {
-    ThemeSelectionCard(
-        selectedTheme: .constant(""),
-        showThemeSelection: .constant(false),
-        themePlaceholder: "どんな発見を求めますか？",
-        availableThemes: ["自然・公園", "歴史・文化", "グルメ・カフェ"],
-        onThemeSelect: { _ in }
-    )
 }

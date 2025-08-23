@@ -22,7 +22,7 @@ protocol RequestProtocol: Encodable {
 
 extension RequestProtocol {
     var baseUrl: String {
-        return "hogehoge" //TODO: BaseURLを置き換える
+        return "https://dev-app-server-841104676464.asia-northeast1.run.app"
     }
     var encoding: Alamofire.ParameterEncoding {
         return JSONEncoding.default
@@ -60,5 +60,15 @@ extension RequestProtocol {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Date string does not match any expected format.")
         }
         return decoder
+    }
+}
+
+extension Encodable {
+    func asDictionary() throws -> [String: Any] {
+        let data = try JSONEncoder().encode(self)
+        guard let dictionary = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] else {
+            throw NSError()
+        }
+        return dictionary
     }
 }

@@ -45,16 +45,7 @@ struct StoryRouteDetailView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
             
-            // 位置情報とカテゴリ
-            HStack(spacing: 8) {
-                Image(systemName: "location")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-                
-                Text("\(viewModel.formatLocation()) • \(viewModel.formatDate())")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-            }
+
             
             // 説明文
             Text(viewModel.route.description)
@@ -119,7 +110,7 @@ struct StoryRouteDetailView: View {
         VStack(spacing: 16) {
             // タグ表示
             if !viewModel.route.highlights.isEmpty {
-                tagsView
+                
             }
             
             // 道のりセクション
@@ -132,21 +123,7 @@ struct StoryRouteDetailView: View {
         .padding(.bottom, 40)
     }
     
-    // MARK: - Tags View
-    private var tagsView: some View {
-        HStack {
-            ForEach(viewModel.route.highlights.prefix(3)) { highlight in
-                Text("#\(highlight.name)")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.blue)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
-                    .clipShape(Capsule())
-            }
-            Spacer()
-        }
-    }
+
     
     // MARK: - Route Steps View
     private var routeStepsView: some View {
@@ -225,21 +202,7 @@ struct StoryRouteDetailView: View {
         Button(action: {
             viewModel.startNavigation()
         }) {
-            HStack {
-                if viewModel.isStartingNavigation {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.8)
-                } else {
-                    Text("閉じる")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 25))
+
         }
         .disabled(viewModel.isStartingNavigation)
         .padding(.horizontal, 16)

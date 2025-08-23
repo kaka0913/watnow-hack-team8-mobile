@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RouteStepsView: View {
     let steps: [RouteStep]
+    let storyText: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -18,7 +19,7 @@ struct RouteStepsView: View {
                     .foregroundColor(.purple)
                     .font(.system(size: 16))
                 
-                Text("背景の蜜蜂が紡ぐ、古き良き商店街の物語")
+                Text(storyText)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.primary)
                 
@@ -132,32 +133,4 @@ private struct RouteStepRow: View {
             return .gray.opacity(0.3)
         }
     }
-}
-
-#Preview {
-    let sampleSteps = [
-        RouteStep(
-            stepNumber: 1,
-            description: "商店街入口へ向かう",
-            distance: "200m",
-            isCompleted: true,
-            stepType: .completed
-        ),
-        RouteStep(
-            stepNumber: 2,
-            description: "老舗和菓子店「豊月堂」を発見",
-            distance: "150m",
-            isCompleted: false,
-            stepType: .current
-        ),
-        RouteStep(
-            stepNumber: 3,
-            description: "昭和レトロ喫茶「黄昏」で休憩",
-            distance: "300m",
-            isCompleted: false,
-            stepType: .upcoming
-        )
-    ]
-    
-    return RouteStepsView(steps: sampleSteps)
 }

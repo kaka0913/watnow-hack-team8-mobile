@@ -61,6 +61,7 @@ struct NavigationView: View {
                     NavigationHeaderView(
                         remainingTime: viewModel.remainingTime,
                         remainingDistance: viewModel.remainingDistance,
+                        routeTitle: viewModel.routeTitle,
                         onDismiss: { dismiss() }
                     )
                     .padding(.horizontal, 16)
@@ -150,7 +151,7 @@ struct NavigationView: View {
                         // ボトムシートコンテンツ
                         VStack(spacing: 16) {
                             // 道のりセクション
-                            RouteStepsView(steps: viewModel.routeSteps)
+                            RouteStepsView(steps: viewModel.routeSteps, storyText: viewModel.currentStoryText)
                                 .frame(maxHeight: isBottomSheetExpanded ? .infinity : 0)
                                 .clipped()
                             
@@ -207,8 +208,4 @@ struct NavigationView: View {
             WalkSummaryView()
         }
     }
-}
-
-#Preview {
-    NavigationView()
 }

@@ -62,35 +62,37 @@ class DestinationSettingViewModel {
             // UI用のテーマをAPI用に変換
             let apiTheme = routeService.mapUIThemeToAPITheme(selectedTheme)
             
-            // 目的地の座標を取得（ここではダミー座標を使用）
+            // TODO:目的地の座標を取得（ここではダミー座標を使用）
             let destinationLocation = Location(
                 latitude: 34.9735, // ちいかわ
                 longitude: 135.7582
             )
 
-            // TODO: API呼び出しを一時的にモックに差し替え
-            // let response = try await routeService.generateRouteFromCurrentLocation(
-            //     destinationLocation: destinationLocation,
-            //     theme: apiTheme
-            // )
+            let response = try await routeService.generateRouteFromCurrentLocation(
+                destinationLocation: destinationLocation,
+                theme: apiTheme
+            )
+
+            self.routeProposals = response.proposals
             
-            // モックデータを使用
-            let mockResponse = createMockRouteProposalResponse(theme: apiTheme)
-            
-            // 取得した提案を保存
-            self.routeProposals = mockResponse.proposals
-            
-            print("✅ ルート検索成功（モックデータ使用）")
-            print("提案数: \(mockResponse.proposals.count)")
-            print("hasRouteProposals: \(hasRouteProposals)")
-            
-            if let firstProposal = mockResponse.proposals.first {
-                print("最初の提案: \(firstProposal.title)")
-                print("推定時間: \(firstProposal.estimatedDurationMinutes ?? 0)分")
-                print("推定距離: \(firstProposal.estimatedDistanceMeters ?? 0)m")
-                print("提案ID: \(firstProposal.proposalId ?? "なし")")
+            print("📱 実際のAPI呼び出し成功:")
+            print("   - 提案数: \(response.proposals.count)")
+            for (index, proposal) in response.proposals.enumerated() {
+                print("   [提案\(index + 1)]")
+                print("     - タイトル: \(proposal.title)")
+                print("     - ProposalID: \(proposal.proposalId ?? "なし")")
+                print("     - 時間: \(proposal.estimatedDurationMinutes ?? 0)分")
+                print("     - 距離: \(proposal.estimatedDistanceMeters ?? 0)m")
+                print("     - テーマ: \(proposal.theme ?? "なし")")
+                print("     - ハイライト数: \(proposal.displayHighlights?.count ?? 0)")
+                if let highlights = proposal.displayHighlights {
+                    print("     - ハイライト: \(highlights)")
+                }
+                print("     - ストーリー: \(proposal.generatedStory?.prefix(50) ?? "なし")...")
             }
-//            
+            
+            print("✅ ルート検索成功（実際のAPI使用）")
+            print("hasRouteProposals: \(hasRouteProposals)")
         } catch {
             print("❌ ルート検索に失敗しました: \(error)")
             
@@ -127,70 +129,5 @@ class DestinationSettingViewModel {
         return !routeProposals.isEmpty
     }
     
-    // MARK: - Mock Data Generation
-    
-    private func createMockRouteProposalResponse(theme: String) -> RouteProposalResponse {
-        let mockProposals = [
-            RouteProposal(
-                proposalId: "dest_mock_1",
-                title: "\(selectedTheme)を楽しむ散歩道",
-                estimatedDurationMinutes: 45,
-                estimatedDistanceMeters: 2100,
-                theme: theme,
-                displayHighlights: getThemeHighlights(theme),
-                navigationSteps: createMockNavigationSteps(),
-                routePolyline: "mock_polyline_dest_1",
-                generatedStory: "\(destination)への道のりで、\(selectedTheme)の魅力を存分に味わえる素敵な散歩コースです。"
-            ),
-            RouteProposal(
-                proposalId: "dest_mock_2",
-                title: "隠れた名所を巡る\(selectedTheme)ルート",
-                estimatedDurationMinutes: 60,
-                estimatedDistanceMeters: 2800,
-                theme: theme,
-                displayHighlights: getThemeHighlights(theme),
-                navigationSteps: createMockNavigationSteps(),
-                routePolyline: "mock_polyline_dest_2",
-                generatedStory: "地元の人だけが知る隠れた\(selectedTheme)スポットを発見できる、特別な散歩体験をお楽しみください。"
-            )
-        ]
-        
-        return RouteProposalResponse(proposals: mockProposals)
-    }
-    
-    private func getThemeHighlights(_ theme: String) -> [String] {
-        switch theme {
-        case "nature":
-            return ["季節の花壇", "野鳥観察スポット", "緑陰の休憩所"]
-        case "gourmet":
-            return ["老舗カフェ", "地元グルメ", "手作りスイーツ店"]
-        case "art":
-            return ["ストリートアート", "小さなギャラリー", "アーティスト工房"]
-        default:
-            return ["魅力的なスポット1", "魅力的なスポット2", "魅力的なスポット3"]
-        }
-    }
-    
-    private func createMockNavigationSteps() -> [NavigationStep] {
-        return [
-            NavigationStep(
-                type: .navigation,
-                description: "出発地点から歩き始めます",
-                distanceToNextMeters: 200,
-                poiId: nil,
-                name: nil,
-                latitude: nil,
-                longitude: nil
-            ),
-            NavigationStep(
-                type: .poi,
-                description: "最初の見どころに到着",
-                distanceToNextMeters: 300,
-                poiId: "mock_poi_1",
-                name: "魅力的なスポット",
-                latitude: 35.6762,
-                longitude: 139.7649
-            )
-        ]
-    }
+
 }

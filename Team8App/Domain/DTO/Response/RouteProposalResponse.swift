@@ -15,16 +15,6 @@ struct RouteProposal: Codable {
     let routePolyline: String?  // オプショナルに変更
     let generatedStory: String?  // オプショナルに変更
     
-    enum CodingKeys: String, CodingKey {
-        case proposalId = "proposal_id"
-        case title, theme
-        case estimatedDurationMinutes = "estimated_duration_minutes"
-        case estimatedDistanceMeters = "estimated_distance_meters"
-        case displayHighlights = "display_highlights"
-        case navigationSteps = "navigation_steps"
-        case routePolyline = "route_polyline"
-        case generatedStory = "generated_story"
-    }
 }
 
 struct NavigationStep: Codable {
@@ -36,11 +26,6 @@ struct NavigationStep: Codable {
     let latitude: Double?
     let longitude: Double?
     
-    enum CodingKeys: String, CodingKey {
-        case type, description, name, latitude, longitude
-        case distanceToNextMeters = "distance_to_next_meters"
-        case poiId = "poi_id"
-    }
 }
 
 enum NavigationStepType: String, Codable {

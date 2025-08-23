@@ -2,16 +2,21 @@ import Foundation
 
 @Observable
 class StoryRouteViewModel {
+    static let shared = StoryRouteViewModel()
+    
     var storyRoutes: [StoryRoute] = []
     var isLoading: Bool = false
     var errorMessage: String?
+    var routeProposals: [RouteProposal] = []
     
     // private let storyRouteRepository = StoryRouteRepository.shared
     
-    init() {
+    private init() {
         Task {
             await fetchStoryRoutes()
         }
+        // 実際のAPIデータのみを使用するため、初期状態は空配列
+        routeProposals = []
     }
     
     @MainActor
@@ -33,4 +38,11 @@ class StoryRouteViewModel {
         print("ルートを開始: \(route.title)")
         // ここでナビゲーション開始の処理を実装
     }
+    
+    // 実際のAPIデータを設定
+    func setRouteProposals(_ proposals: [RouteProposal]) {
+        self.routeProposals = proposals
+    }
+    
+
 }

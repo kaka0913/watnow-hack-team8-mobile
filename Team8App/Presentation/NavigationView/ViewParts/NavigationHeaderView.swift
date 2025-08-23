@@ -10,6 +10,7 @@ import SwiftUI
 struct NavigationHeaderView: View {
     let remainingTime: String
     let remainingDistance: String
+    let routeTitle: String
     let onDismiss: () -> Void
     
     var body: some View {
@@ -38,9 +39,11 @@ struct NavigationHeaderView: View {
                             .font(.system(size: 14))
                     }
                 
-                Text("ナビゲーション中")
+                Text(routeTitle)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
             
             Spacer()
@@ -81,13 +84,4 @@ private struct InfoItem: View {
                 .foregroundColor(.primary)
         }
     }
-}
-
-#Preview {
-    NavigationHeaderView(
-        remainingTime: "残り32分",
-        remainingDistance: "1.8km",
-        onDismiss: {}
-    )
-    .padding()
 }

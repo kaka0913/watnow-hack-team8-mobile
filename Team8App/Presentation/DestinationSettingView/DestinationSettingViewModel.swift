@@ -62,30 +62,37 @@ class DestinationSettingViewModel {
             // UI用のテーマをAPI用に変換
             let apiTheme = routeService.mapUIThemeToAPITheme(selectedTheme)
             
-            // 目的地の座標を取得（ここではダミー座標を使用）
+            // TODO:目的地の座標を取得（ここではダミー座標を使用）
             let destinationLocation = Location(
                 latitude: 34.9735, // ちいかわ
                 longitude: 135.7582
             )
-            // RouteServiceを使用してルート提案を取得
+
             let response = try await routeService.generateRouteFromCurrentLocation(
                 destinationLocation: destinationLocation,
                 theme: apiTheme
             )
-            
-            // 取得した提案を保存
+
             self.routeProposals = response.proposals
             
-            print("✅ ルート検索成功")
-            print("提案数: \(response.proposals.count)")
-            
-            if let firstProposal = response.proposals.first {
-                print("最初の提案: \(firstProposal.title)")
-                print("推定時間: \(firstProposal.estimatedDurationMinutes ?? 0)分")
-                print("推定距離: \(firstProposal.estimatedDistanceMeters ?? 0)m")
-                print("提案ID: \(firstProposal.proposalId ?? "なし")")
+            print("📱 実際のAPI呼び出し成功:")
+            print("   - 提案数: \(response.proposals.count)")
+            for (index, proposal) in response.proposals.enumerated() {
+                print("   [提案\(index + 1)]")
+                print("     - タイトル: \(proposal.title)")
+                print("     - ProposalID: \(proposal.proposalId ?? "なし")")
+                print("     - 時間: \(proposal.estimatedDurationMinutes ?? 0)分")
+                print("     - 距離: \(proposal.estimatedDistanceMeters ?? 0)m")
+                print("     - テーマ: \(proposal.theme ?? "なし")")
+                print("     - ハイライト数: \(proposal.displayHighlights?.count ?? 0)")
+                if let highlights = proposal.displayHighlights {
+                    print("     - ハイライト: \(highlights)")
+                }
+                print("     - ストーリー: \(proposal.generatedStory?.prefix(50) ?? "なし")...")
             }
             
+            print("✅ ルート検索成功（実際のAPI使用）")
+            print("hasRouteProposals: \(hasRouteProposals)")
         } catch {
             print("❌ ルート検索に失敗しました: \(error)")
             
@@ -117,4 +124,10 @@ class DestinationSettingViewModel {
         errorMessage = nil
         routeProposals = []
     }
+    
+    var hasRouteProposals: Bool {
+        return !routeProposals.isEmpty
+    }
+    
+
 }

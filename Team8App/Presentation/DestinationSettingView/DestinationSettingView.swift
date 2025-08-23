@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DestinationSettingView: View {
     @State private var viewModel = DestinationSettingViewModel()
+    @State private var showStoryRouteView = false
     @Environment(\.dismiss) private var dismiss
     
    var body: some View {
@@ -10,10 +11,7 @@ struct DestinationSettingView: View {
                     .ignoresSafeArea()
                 
                     VStack(spacing: 20) {
-                        // Header
-                        DestinationHeaderView(onBack: {
-                            dismiss()
-                        })
+                        Spacer().frame(height: 20)
                         
                         // Location Settings Card
                         LocationSettingCard(
@@ -38,9 +36,19 @@ struct DestinationSettingView: View {
                             onSearchRoute: {
                                 Task {
                                     await viewModel.searchRoute()
-                                    StoryRouteView()
+                                    // メインスレッドで状態更新を確実に実行
+                                    await MainActor.run {
+                                        print("🔍 検索結果: \(viewModel.routeProposals.count)件")
+                                        if viewModel.hasRouteProposals {
+                                            print("✅ 遷移開始")
+                                            showStoryRouteView = true
+                                        } else {
+                                            print("❌ API失敗のため、モックデータで遷移")
+                                            // API失敗時でもStoryRouteViewに遷移（モックデータを表示）
+                                            showStoryRouteView = true
+                                        }
+                                    }
                                 }
-                                
                             }
                         )
                         .padding(.top, 40)
@@ -54,6 +62,30 @@ struct DestinationSettingView: View {
                     }
                 } message: {
                     Text(viewModel.errorMessage ?? "")
+                }
+                .navigationTitle("目的地設定")
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationBarHidden(false) // 明示的にナビゲーションバーを表示
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        HStack {
+                            Image(systemName: "location.circle.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+                .navigationDestination(isPresented: $showStoryRouteView) {
+                    StoryRouteView()
+                        .onAppear {
+                            print("📱 StoryRouteView表示開始")
+                            // ViewModelにAPIデータを渡す
+                            if !viewModel.routeProposals.isEmpty {
+                                print("🔄 APIデータをStoryRouteViewModelに設定: \(viewModel.routeProposals.count)件")
+                                StoryRouteViewModel.shared.setRouteProposals(viewModel.routeProposals)
+                            } else {
+                                print("🎭 モックデータを使用")
+                            }
+                        }
                 }
     }
 }

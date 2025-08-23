@@ -42,12 +42,6 @@ struct RouteProposalRequest: Codable {
     let durationMinutes: Int?   // APIに合わせて"duration_minutes"に変更
     let theme: String
     
-    enum CodingKeys: String, CodingKey {
-        case startLocation = "start_location"
-        case destination = "destination"  // APIフィールド名に合わせる
-        case mode, theme
-        case durationMinutes = "duration_minutes"  // APIフィールド名に合わせる
-    }
 }
 
 struct Location: Codable {

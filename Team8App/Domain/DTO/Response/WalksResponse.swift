@@ -13,7 +13,7 @@ struct Walk: Codable {
     let durationMinutes: Int
     let distanceMeters: Int
     let tags: [String]
-    let endLocation: WalkLocation
+    let endLocation: WalkLocation?  // オプショナルに変更
     let routePolyline: String
 }
 

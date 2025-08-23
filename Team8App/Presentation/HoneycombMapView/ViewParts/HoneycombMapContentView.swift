@@ -5,9 +5,9 @@ struct HoneycombMapContentView: View {
     let routes: [StoryRoute]
     let onRouteSelect: (StoryRoute) -> Void
     
-    // 東京（渋谷・表参道エリア）を中心とした地図の初期設定
+    // 京都を中心とした地図の初期設定
     @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 35.6586, longitude: 139.7454), // 渋谷駅周辺
+        center: CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681), // 京都駅周辺
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01) // ズームレベル調整
     )
     
@@ -50,10 +50,10 @@ struct HoneycombMapContentView: View {
                     VStack(spacing: 8) {
                         // 現在位置ボタン
                         Button(action: {
-                            // 渋谷エリアに戻る
+                            // 京都エリアに戻る
                             withAnimation(.easeInOut(duration: 1.0)) {
                                 region = MKCoordinateRegion(
-                                    center: CLLocationCoordinate2D(latitude: 35.6586, longitude: 139.7454),
+                                    center: CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681), // 京都駅
                                     span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
                                 )
                             }
@@ -101,24 +101,30 @@ struct HoneycombMapContentView: View {
     
     // MARK: - Helper Methods
     private func coordinateForRoute(at index: Int) -> CLLocationCoordinate2D {
-        // 渋谷・表参道エリア周辺の実際の座標にルートを配置
-        let baseCoordinate = CLLocationCoordinate2D(latitude: 35.6586, longitude: 139.7454) // 渋谷駅
+        // 京都市内の実際の座標にルートを配置
+        let baseCoordinate = CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681) // 京都駅
         
         switch index % routes.count {
         case 0:
-            // 代々木公園エリア
-            return CLLocationCoordinate2D(latitude: 35.6663, longitude: 139.7380)
+            // 清水寺エリア
+            return CLLocationCoordinate2D(latitude: 34.9949, longitude: 135.7850)
         case 1:
-            // 表参道エリア
-            return CLLocationCoordinate2D(latitude: 35.6643, longitude: 139.7280)
+            // 祇園エリア
+            return CLLocationCoordinate2D(latitude: 35.0031, longitude: 135.7756)
         case 2:
-            // 原宿エリア
-            return CLLocationCoordinate2D(latitude: 35.6708, longitude: 139.7028)
+            // 金閣寺エリア
+            return CLLocationCoordinate2D(latitude: 35.0394, longitude: 135.7292)
         case 3:
-            // 青山エリア
-            return CLLocationCoordinate2D(latitude: 35.6626, longitude: 139.7096)
+            // 嵐山エリア
+            return CLLocationCoordinate2D(latitude: 35.0170, longitude: 135.6761)
+        case 4:
+            // 本能寺エリア（中京区）
+            return CLLocationCoordinate2D(latitude: 35.0068, longitude: 135.7681)
+        case 5:
+            // 神泉苑エリア
+            return CLLocationCoordinate2D(latitude: 35.0095, longitude: 135.7584)
         default:
-            // その他は渋谷周辺にランダム配置
+            // その他は京都駅周辺にランダム配置
             let latOffset = Double.random(in: -0.005...0.005)
             let lonOffset = Double.random(in: -0.005...0.005)
             return CLLocationCoordinate2D(

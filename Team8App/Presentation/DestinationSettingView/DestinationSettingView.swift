@@ -10,10 +10,7 @@ struct DestinationSettingView: View {
                     .ignoresSafeArea()
                 
                     VStack(spacing: 20) {
-                        // Header
-                        DestinationHeaderView(onBack: {
-                            dismiss()
-                        })
+                        Spacer().frame(height: 20) // ナビゲーションバーとの間隔
                         
                         // Location Settings Card
                         LocationSettingCard(
@@ -54,6 +51,17 @@ struct DestinationSettingView: View {
                     }
                 } message: {
                     Text(viewModel.errorMessage ?? "")
+                }
+                .navigationTitle("目的地設定")
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationBarHidden(false) // 明示的にナビゲーションバーを表示
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        HStack {
+                            Image(systemName: "location.circle.fill")
+                                .foregroundColor(.orange)
+                        }
+                    }
                 }
     }
 }

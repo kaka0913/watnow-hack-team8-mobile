@@ -44,8 +44,9 @@ class NavigationViewModel: NSObject {
     
     // MARK: - Route Deviation Properties
     var showRouteDeviationDialog: Bool = false
-    private let routeDeviationThreshold: Double = 250.0 // 250m
+    private let routeDeviationThreshold: Double = 150.0 // 250m
     private var isTrackingRoute: Bool = false
+    private var hasUserDismissedDeviationDialog: Bool = false // ユーザーがダイアログを閉じたかのフラグ
     
     // MARK: - Services
     private let locationManager = CLLocationManager()
@@ -81,6 +82,13 @@ class NavigationViewModel: NSObject {
         LocationManager.shared.stopLocationUpdates()
         clearSavedRoute() // 散歩終了時にルート情報をクリア
         showWalkSummary = true
+    }
+    
+    // ダイアログが閉じられた時に呼び出されるメソッド
+    func dismissRouteDeviationDialog() {
+        showRouteDeviationDialog = false
+        hasUserDismissedDeviationDialog = true
+        print("🚫 ルート逸脱ダイアログが閉じられました。自動表示を無効化します。")
     }
     
     @MainActor
@@ -544,7 +552,8 @@ extension NavigationViewModel {
     private func checkRouteDeviation() {
         guard isTrackingRoute,
               let currentLocation = LocationManager.shared.currentLocation,
-              !routeCoordinates.isEmpty else { return }
+              !routeCoordinates.isEmpty,
+              !hasUserDismissedDeviationDialog else { return } // ユーザーがダイアログを閉じた後は自動表示しない
         
         let currentCoordinate = currentLocation
         let distanceToRoute = distanceFromCurrentLocationToRoute(currentCoordinate)

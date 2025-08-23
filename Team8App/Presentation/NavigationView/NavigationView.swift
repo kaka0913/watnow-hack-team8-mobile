@@ -188,13 +188,15 @@ struct NavigationView: View {
                     onRecalculateRoute: {
                         Task {
                             await viewModel.recalculateRoute()
-                            // ダイアログを閉じる
                             await MainActor.run {
-                                viewModel.showRouteDeviationDialog = false
+                                viewModel.dismissRouteDeviationDialog()
                             }
                         }
                     }
                 )
+                .onDisappear {
+                    viewModel.dismissRouteDeviationDialog()
+                }
             }
             
             if viewModel.isLoading {

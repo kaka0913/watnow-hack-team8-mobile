@@ -2,6 +2,8 @@ import SwiftUI
 
 struct StoryRouteView: View {
     @State private var viewModel = StoryRouteViewModel.shared
+    @State private var showNavigationView = false
+    @State private var selectedRoute: StoryRoute?
     
     var body: some View {
     
@@ -19,7 +21,12 @@ struct StoryRouteView: View {
                         ForEach(displayProposals, id: \.proposalId) { proposal in
                             StoryRouteCard(
                                 route: convertToStoryRoute(proposal),
-                                onStartRoute: { viewModel.startRoute(convertToStoryRoute(proposal)) }
+                                onStartRoute: { 
+                                    let route = convertToStoryRoute(proposal)
+                                    selectedRoute = route
+                                    showNavigationView = true
+                                    viewModel.startRoute(route)
+                                }
                             )
                         }
                     }
@@ -50,7 +57,13 @@ struct StoryRouteView: View {
                     }
                 }
             }
-
+            .navigationDestination(isPresented: $showNavigationView) {
+                if let route = selectedRoute {
+                    NavigationView(selectedRoute: route)
+                } else {
+                    EmptyView()
+                }
+            }
         }
     }
     

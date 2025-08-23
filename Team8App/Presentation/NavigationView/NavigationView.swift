@@ -9,8 +9,13 @@ import SwiftUI
 import MapKit
 
 struct NavigationView: View {
+    let selectedRoute: StoryRoute?
     @State private var viewModel = NavigationViewModel()
     @Environment(\.dismiss) private var dismiss
+    
+    init(selectedRoute: StoryRoute? = nil) {
+        self.selectedRoute = selectedRoute
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -87,6 +92,10 @@ struct NavigationView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            if let route = selectedRoute {
+                print("🗺 NavigationView表示: \(route.title)")
+                // TODO: viewModel.setSelectedRoute(route)
+            }
             Task {
                 await viewModel.startNavigation()
             }

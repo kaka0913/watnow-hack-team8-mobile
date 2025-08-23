@@ -186,7 +186,7 @@ struct NavigationView: View {
                 await viewModel.startNavigation()
             }
         }
-        .sheet(isPresented: $viewModel.showWalkSummary) {
+        .navigationDestination(isPresented: $viewModel.showWalkSummary) {
             WalkSummaryView()
         }
     }

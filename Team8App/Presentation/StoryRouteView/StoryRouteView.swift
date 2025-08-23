@@ -36,12 +36,6 @@ struct StoryRouteView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("戻る") {
-                        // ナビゲーション戻る処理
-                    }
-                }
-                
                 ToolbarItem(placement: .principal) {
                     HStack {
                         Circle()

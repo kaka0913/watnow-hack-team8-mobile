@@ -31,9 +31,9 @@ struct MapContainerView: View {
             .mapStyle(.standard(elevation: .flat))
             .allowsHitTesting(true) // タッチ操作を明示的に有効化
             
-            // ルート線の描画（簡易版）
+            // ルート線の描画（地図の表示領域に連動）
             if !route.isEmpty {
-                RouteOverlayView(route: route)
+                RouteOverlayView(route: route, mapRegion: region)
                     .allowsHitTesting(false) // ルート線はタッチを通す
             }
         }
@@ -77,9 +77,10 @@ private struct MapAnnotationItem: Identifiable {
 
 private struct RouteOverlayView: View {
     let route: [CLLocationCoordinate2D]
+    let mapRegion: MKCoordinateRegion
     
     var body: some View {
-        // 簡易的なルート線表示（実際のMapKitのMKPolylineを使用することを推奨）
+        // 地図の表示領域に連動したルート線表示
         Canvas { context, size in
             guard route.count >= 2 else { return }
             
@@ -99,16 +100,30 @@ private struct RouteOverlayView: View {
             
             context.stroke(
                 path,
-                with: .color(.blue),
-                style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                with: .color(.orange),
+                style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
             )
         }
     }
     
     private func convertCoordinateToPoint(_ coordinate: CLLocationCoordinate2D, size: CGSize) -> CGPoint? {
-        // 簡易的な座標変換（実際の実装では正確な地図座標変換が必要）
-        let x = size.width * 0.5 + CGFloat((coordinate.longitude - 139.6503) * 10000)
-        let y = size.height * 0.5 - CGFloat((coordinate.latitude - 35.6762) * 10000)
+        // 現在の地図表示領域に基づく正確な座標変換
+        let mapCenter = mapRegion.center
+        let mapSpan = mapRegion.span
+        
+        // 経度と緯度の相対位置を計算
+        let longitudeRatio = (coordinate.longitude - mapCenter.longitude) / mapSpan.longitudeDelta
+        let latitudeRatio = (coordinate.latitude - mapCenter.latitude) / mapSpan.latitudeDelta
+        
+        // 画面座標に変換
+        let x = size.width * 0.5 + CGFloat(longitudeRatio) * size.width
+        let y = size.height * 0.5 - CGFloat(latitudeRatio) * size.height // Y軸は反転
+        
+        // 画面範囲内にあるかチェック
+        guard x >= 0 && x <= size.width && y >= 0 && y <= size.height else {
+            return nil
+        }
+        
         return CGPoint(x: x, y: y)
     }
 }
@@ -124,7 +139,8 @@ private struct RouteOverlayView: View {
         currentLocation: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
         route: [
             CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
-            CLLocationCoordinate2D(latitude: 35.6772, longitude: 139.6513)
+            CLLocationCoordinate2D(latitude: 35.6772, longitude: 139.6513),
+            CLLocationCoordinate2D(latitude: 35.6780, longitude: 139.6520)
         ],
         isNavigationActive: true
     )

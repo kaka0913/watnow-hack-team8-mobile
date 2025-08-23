@@ -70,9 +70,8 @@ struct NavigationView: View {
                     // 地図エリア（フルスクリーン）
                     MapContainerView(
                         region: $viewModel.mapRegion,
-                        currentLocation: viewModel.currentLocation,
-                        route: viewModel.route,
-                        isNavigationActive: true
+                        routeCoordinates: $viewModel.routeCoordinates,
+                        annotations: $viewModel.annotations
                     )
                     .clipped() // 地図の境界を明確にする
                     .overlay(

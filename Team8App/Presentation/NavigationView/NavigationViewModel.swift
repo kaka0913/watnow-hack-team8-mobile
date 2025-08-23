@@ -27,6 +27,8 @@ class NavigationViewModel: NSObject {
     )
     var currentLocation: CLLocationCoordinate2D?
     var route: [CLLocationCoordinate2D] = []
+    var routeCoordinates: [CLLocationCoordinate2D] = []
+    var annotations: [CustomAnnotation] = []
     
     var remainingTime: String = "残り32分"
     var remainingDistance: String = "1.8km"
@@ -114,12 +116,6 @@ class NavigationViewModel: NSObject {
             print("目的地: \(currentDestination?.latitude ?? 0), \(currentDestination?.longitude ?? 0)")
             
 
-            // TODO: 実際の現在地を取得する方法を実装
-            let mockcurrentLocation = Location(
-                latitude: 34.97544,
-                longitude: 135.76029
-            )
-
             let currentLocationData = Location(
                 latitude: currentLoc.latitude,
                 longitude: currentLoc.longitude
@@ -131,8 +127,8 @@ class NavigationViewModel: NSObject {
                 destinationLocation: currentDestination,
                 mode: currentMode,
                 visitedPois: visitedPois,
-                weather: "sunny", // TODO: 実際の天気を取得
-                timeOfDay: "afternoon" // TODO: 実際の時間帯を取得
+                weather: "sunny",
+                timeOfDay: "afternoon"
             )
             
             // 新しいルート情報で更新
@@ -171,8 +167,24 @@ class NavigationViewModel: NSObject {
         // 再計算されたルート情報でViewModelを更新
         let newRoute = response.updatedRoute
         
-        // TODO: routePolylineから実際の座標配列を生成する実装が必要
-        // 現在はサンプル座標を使用（将来的にはroutePolylineをパースして座標配列に変換）
+        // ポリラインをデコードして座標配列に変換
+        let decodedRoute = PolylineDecoder.decode(newRoute.routePolyline)
+        if PolylineDecoder.isValidCoordinates(decodedRoute) {
+            route = decodedRoute
+            routeCoordinates = decodedRoute
+            
+            // アノテーションを更新
+            updateAnnotations(for: decodedRoute)
+            
+            // 地図の表示領域をルートに合わせて調整
+            if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
+                mapRegion = newRegion
+            }
+            
+            print("🗺 ポリラインから\(decodedRoute.count)個の座標を生成しました")
+        } else {
+            print("⚠️ ポリラインのデコードに失敗したため、既存のルートを維持します")
+        }
         
         // ルートタイトルを更新（再計算後の新しいタイトル）
         routeTitle = newRoute.title
@@ -206,6 +218,7 @@ class NavigationViewModel: NSObject {
         print("   - ハイライト数: \(newRoute.highlights.count)")
         print("   - ストーリー長: \(newRoute.generatedStory.count)文字")
         print("   - ルートステップ数: \(routeSteps.count)")
+        print("   - ポリライン座標数: \(route.count)")
         print("✨ NavigationView UI更新完了")
     }
     
@@ -251,6 +264,25 @@ class NavigationViewModel: NSObject {
         // ルートタイトルを設定
         routeTitle = route.title
         
+        // 保存されているポリライン情報があれば復元
+        if let savedPolyline = UserDefaults.standard.string(forKey: "currentRoutePolyline") {
+            let decodedRoute = PolylineDecoder.decode(savedPolyline)
+            if PolylineDecoder.isValidCoordinates(decodedRoute) {
+                self.route = decodedRoute
+                self.routeCoordinates = decodedRoute
+                
+                // アノテーションを設定
+                updateAnnotations(for: decodedRoute)
+                
+                // 地図の表示領域をルートに合わせて調整
+                if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
+                    mapRegion = newRegion
+                }
+                
+                print("🗺 選択されたルートのポリラインから\(decodedRoute.count)個の座標を復元しました")
+            }
+        }
+        
         // 位置情報の取得を開始（recalculateRouteで現在地が必要なため）
         requestLocationPermission()
         locationManager.startUpdatingLocation()
@@ -292,9 +324,9 @@ class NavigationViewModel: NSObject {
             
             // 基本情報を復元
             let savedTitle = userDefaults.string(forKey: "currentRouteTitle") ?? ""
-            let savedDuration = userDefaults.integer(forKey: "currentRouteDuration")
-            let savedDistance = userDefaults.double(forKey: "currentRouteDistance")
-            let savedDescription = userDefaults.string(forKey: "currentRouteDescription") ?? ""
+            _ = userDefaults.integer(forKey: "currentRouteDuration")
+            _ = userDefaults.double(forKey: "currentRouteDistance")
+            _ = userDefaults.string(forKey: "currentRouteDescription") ?? ""
             let savedMode = userDefaults.string(forKey: "currentWalkMode") ?? "destination"
             
             // ルートタイトルを設定
@@ -309,6 +341,27 @@ class NavigationViewModel: NSObject {
             if let stepsData = userDefaults.data(forKey: "currentRouteNavigationSteps"),
                let navigationSteps = try? JSONDecoder().decode([NavigationStep].self, from: stepsData) {
                 loadNavigationStepsFromAPI(navigationSteps, actualDuration: actualDuration)
+            }
+            
+            // ポリラインを復元してルート座標を設定
+            if let savedPolyline = userDefaults.string(forKey: "currentRoutePolyline") {
+                let decodedRoute = PolylineDecoder.decode(savedPolyline)
+                if PolylineDecoder.isValidCoordinates(decodedRoute) {
+                    route = decodedRoute
+                    routeCoordinates = decodedRoute
+                    
+                    // アノテーションを更新
+                    updateAnnotations(for: decodedRoute)
+                    
+                    // 地図の表示領域をルートに合わせて調整
+                    if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
+                        mapRegion = newRegion
+                    }
+                    
+                    print("🗺 保存されたポリラインから\(decodedRoute.count)個の座標を復元しました")
+                } else {
+                    print("⚠️ 保存されたポリラインのデコードに失敗しました")
+                }
             }
             
             // ストーリーを復元
@@ -424,4 +477,35 @@ enum RouteStepType {
     case completed
     case current
     case upcoming
+}
+
+// MARK: - Private Helper Methods
+extension NavigationViewModel {
+    private func updateAnnotations(for coordinates: [CLLocationCoordinate2D]) {
+        annotations.removeAll()
+        
+        guard !coordinates.isEmpty else { return }
+        
+        // 開始地点のアノテーション
+        if let firstCoordinate = coordinates.first {
+            let startAnnotation = CustomAnnotation(
+                coordinate: firstCoordinate,
+                title: "開始地点",
+                subtitle: "ルートの開始",
+                type: .start
+            )
+            annotations.append(startAnnotation)
+        }
+        
+        // 終了地点のアノテーション
+        if let lastCoordinate = coordinates.last, coordinates.count > 1 {
+            let endAnnotation = CustomAnnotation(
+                coordinate: lastCoordinate,
+                title: "目的地",
+                subtitle: "ルートの終了",
+                type: .end
+            )
+            annotations.append(endAnnotation)
+        }
+    }
 }

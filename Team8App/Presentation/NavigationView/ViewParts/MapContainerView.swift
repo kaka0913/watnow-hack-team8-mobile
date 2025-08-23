@@ -17,7 +17,7 @@ struct MapContainerView: View {
     var body: some View {
         ZStack {
             // 地図表示（インタラクション有効）
-            Map(coordinateRegion: $region, interactionModes: .all, showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
+            Map(coordinateRegion: $region, interactionModes: [.pan, .zoom], showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
                 MapAnnotation(coordinate: annotation.coordinate) {
                     Circle()
                         .fill(annotation.color)
@@ -41,6 +41,46 @@ struct MapContainerView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+        )
+        .overlay(
+            // ズームコントロールボタン
+            VStack {
+                HStack {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        // ズームイン
+                        Button(action: {
+                            zoomIn()
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.primary)
+                                .frame(width: 40, height: 40)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(8)
+                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                        }
+                        
+                        // ズームアウト
+                        Button(action: {
+                            zoomOut()
+                        }) {
+                            Image(systemName: "minus")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.primary)
+                                .frame(width: 40, height: 40)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(8)
+                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.trailing, 12)
+                }
+                Spacer()
+            }
+            .padding(.top, 12)
         )
     }
     
@@ -66,6 +106,25 @@ struct MapContainerView: View {
         }
         
         return annotations
+    }
+    
+    // MARK: - Zoom Functions
+    private func zoomIn() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            region.span = MKCoordinateSpan(
+                latitudeDelta: max(region.span.latitudeDelta * 0.5, 0.001),
+                longitudeDelta: max(region.span.longitudeDelta * 0.5, 0.001)
+            )
+        }
+    }
+    
+    private func zoomOut() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            region.span = MKCoordinateSpan(
+                latitudeDelta: min(region.span.latitudeDelta * 2.0, 0.1),
+                longitudeDelta: min(region.span.longitudeDelta * 2.0, 0.1)
+            )
+        }
     }
 }
 

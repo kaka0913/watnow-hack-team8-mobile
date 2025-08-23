@@ -21,7 +21,7 @@ class NavigationViewModel: NSObject {
     // MARK: - Map Properties
     var mapRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503), // 東京駅
-        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005) // ズーム可能な適切な範囲
     )
     var currentLocation: CLLocationCoordinate2D?
     var route: [CLLocationCoordinate2D] = []

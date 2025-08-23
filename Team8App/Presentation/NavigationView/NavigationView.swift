@@ -70,6 +70,7 @@ struct NavigationView: View {
                         route: viewModel.route,
                         isNavigationActive: true
                     )
+                    .clipped() // 地図の境界を明確にする
                     .overlay(
                         // ハニービーアイコン
                         VStack {
@@ -89,12 +90,57 @@ struct NavigationView: View {
                     Spacer()
                     
                     VStack(spacing: 0) {
-                        // ドラッグハンドル
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(Color.gray.opacity(0.4))
-                            .frame(width: 40, height: 6)
-                            .padding(.top, 12)
-                            .padding(.bottom, 8)
+                        // ドラッグハンドル領域
+                        VStack {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.gray.opacity(0.4))
+                                .frame(width: 40, height: 6)
+                                .padding(.top, 12)
+                                .padding(.bottom, 8)
+                        }
+                        .frame(height: 30)
+                        .contentShape(Rectangle()) // ドラッグ可能領域を明確に定義
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    let translation = value.translation.height
+                                    if isBottomSheetExpanded {
+                                        // 展開状態：下にドラッグで閉じる
+                                        bottomSheetOffset = max(0, translation)
+                                    } else {
+                                        // 折りたたみ状態：上にドラッグで開く
+                                        bottomSheetOffset = min(0, translation)
+                                    }
+                                }
+                                .onEnded { value in
+                                    let translation = value.translation.height
+                                    let velocity = value.velocity.height
+                                    
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        if isBottomSheetExpanded {
+                                            // 展開状態からの判定
+                                            if translation > 100 || velocity > 500 {
+                                                // 閉じる
+                                                isBottomSheetExpanded = false
+                                                bottomSheetOffset = 0
+                                            } else {
+                                                // 元に戻す
+                                                bottomSheetOffset = 0
+                                            }
+                                        } else {
+                                            // 折りたたみ状態からの判定
+                                            if translation < -50 || velocity < -500 {
+                                                // 開く
+                                                isBottomSheetExpanded = true
+                                                bottomSheetOffset = 0
+                                            } else {
+                                                // 元に戻す
+                                                bottomSheetOffset = 0
+                                            }
+                                        }
+                                    }
+                                }
+                        )
                         
                         // ボトムシートコンテンツ
                         VStack(spacing: 16) {
@@ -126,47 +172,6 @@ struct NavigationView: View {
                     .cornerRadius(20, corners: [.topLeft, .topRight])
                     .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: -5)
                     .offset(y: bottomSheetOffset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                let translation = value.translation.height
-                                if isBottomSheetExpanded {
-                                    // 展開状態：下にドラッグで閉じる
-                                    bottomSheetOffset = max(0, translation)
-                                } else {
-                                    // 折りたたみ状態：上にドラッグで開く
-                                    bottomSheetOffset = min(0, translation)
-                                }
-                            }
-                            .onEnded { value in
-                                let translation = value.translation.height
-                                let velocity = value.velocity.height
-                                
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    if isBottomSheetExpanded {
-                                        // 展開状態からの判定
-                                        if translation > 100 || velocity > 500 {
-                                            // 閉じる
-                                            isBottomSheetExpanded = false
-                                            bottomSheetOffset = 0
-                                        } else {
-                                            // 元に戻す
-                                            bottomSheetOffset = 0
-                                        }
-                                    } else {
-                                        // 折りたたみ状態からの判定
-                                        if translation < -50 || velocity < -500 {
-                                            // 開く
-                                            isBottomSheetExpanded = true
-                                            bottomSheetOffset = 0
-                                        } else {
-                                            // 元に戻す
-                                            bottomSheetOffset = 0
-                                        }
-                                    }
-                                }
-                            }
-                    )
                     .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isBottomSheetExpanded)
                 }
             }

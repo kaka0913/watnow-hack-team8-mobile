@@ -16,8 +16,8 @@ struct MapContainerView: View {
     
     var body: some View {
         ZStack {
-            // 地図表示
-            Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
+            // 地図表示（インタラクション有効）
+            Map(coordinateRegion: $region, interactionModes: .all, showsUserLocation: true, annotationItems: mapAnnotations) { annotation in
                 MapAnnotation(coordinate: annotation.coordinate) {
                     Circle()
                         .fill(annotation.color)
@@ -29,10 +29,12 @@ struct MapContainerView: View {
                 }
             }
             .mapStyle(.standard(elevation: .flat))
+            .allowsHitTesting(true) // タッチ操作を明示的に有効化
             
             // ルート線の描画（簡易版）
             if !route.isEmpty {
                 RouteOverlayView(route: route)
+                    .allowsHitTesting(false) // ルート線はタッチを通す
             }
         }
         .cornerRadius(12)

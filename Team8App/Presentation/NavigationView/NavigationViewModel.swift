@@ -80,7 +80,8 @@ class NavigationViewModel: NSObject {
         print("散歩を終了します")
         isTrackingRoute = false
         LocationManager.shared.stopLocationUpdates()
-        clearSavedRoute() // 散歩終了時にルート情報をクリア
+        // clearSavedRoute()をコメントアウト - WalkSummaryViewで必要な場合があるため
+        // clearSavedRoute() // 散歩終了時にルート情報をクリア
         showWalkSummary = true
     }
     

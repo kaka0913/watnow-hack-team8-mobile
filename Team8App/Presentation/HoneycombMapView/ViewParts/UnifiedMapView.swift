@@ -87,8 +87,8 @@ struct UnifiedMapView: UIViewRepresentable {
             }
         }
         
-        // マップの表示範囲を全ルートに合わせて調整
-        if !allCoordinates.isEmpty {
+        // マップの表示範囲を全ルートに合わせて調整（初回のみ、またはユーザーが操作していない場合のみ）
+        if !allCoordinates.isEmpty && !context.coordinator.hasSetInitialRegion && !context.coordinator.userHasInteracted {
             let minLat = allCoordinates.map { $0.latitude }.min() ?? initialRegion.center.latitude
             let maxLat = allCoordinates.map { $0.latitude }.max() ?? initialRegion.center.latitude
             let minLon = allCoordinates.map { $0.longitude }.min() ?? initialRegion.center.longitude
@@ -105,8 +105,12 @@ struct UnifiedMapView: UIViewRepresentable {
             
             let adjustedRegion = MKCoordinateRegion(center: center, span: span)
             mapView.setRegion(adjustedRegion, animated: true)
+            context.coordinator.hasSetInitialRegion = true
             
             print("🗺️ マップ範囲調整: 中心(\(center.latitude), \(center.longitude)), スパン(\(span.latitudeDelta), \(span.longitudeDelta))")
+            print("📊 重複ポリライン統計: 重複 \(routes.count - addedPolylines.count) 件, ユニーク \(addedPolylines.count) 件")
+        } else if context.coordinator.userHasInteracted {
+            print("🤚 ユーザーが地図を操作済みのため、自動範囲調整をスキップ")
             print("📊 重複ポリライン統計: 重複 \(routes.count - addedPolylines.count) 件, ユニーク \(addedPolylines.count) 件")
         }
     }
@@ -118,6 +122,8 @@ struct UnifiedMapView: UIViewRepresentable {
     class Coordinator: NSObject, MKMapViewDelegate {
         var routes: [StoryRoute]
         var onRouteSelect: (StoryRoute) -> Void
+        var hasSetInitialRegion = false  // 初回の地図範囲設定フラグ
+        var userHasInteracted = false    // ユーザーが地図を操作したかのフラグ
         
         init(routes: [StoryRoute], onRouteSelect: @escaping (StoryRoute) -> Void) {
             self.routes = routes
@@ -176,6 +182,12 @@ struct UnifiedMapView: UIViewRepresentable {
             }
             
             onRouteSelect(routeAnnotation.route)
+        }
+        
+        // ユーザーが地図を手動で操作したことを検出
+        func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+            userHasInteracted = true
+            print("🤚 ユーザーによる地図操作を検出")
         }
         
         /// ルートの色を取得

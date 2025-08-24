@@ -123,6 +123,35 @@ extension RouteService {
             timeOfDay: getCurrentTimeOfDay()
         )
     }
+    
+    /// 出発地点を指定してルート提案を生成
+    func generateRouteFromSpecifiedLocation(
+        startLocation: Location?,
+        destinationLocation: Location?,
+        theme: String,
+        timeMinutes: Int? = nil
+    ) async throws -> RouteProposalResponse {
+        
+        // 出発地点が指定されていない場合は現在地を取得
+        let actualStartLocation: Location
+        if let startLocation = startLocation {
+            actualStartLocation = startLocation
+        } else {
+            actualStartLocation = await LocationManager.shared.getCurrentLocationAsLocation()
+        }
+        
+        let mode: WalkMode = destinationLocation != nil ? .destination : .timeBased
+        
+        return try await generateRouteProposals(
+            startLocation: actualStartLocation,
+            destinationLocation: destinationLocation,
+            mode: mode,
+            timeMinutes: timeMinutes,
+            theme: theme,
+            weather: getCurrentWeather(),
+            timeOfDay: getCurrentTimeOfDay()
+        )
+    }
 }
 
 // MARK: - Helper Methods

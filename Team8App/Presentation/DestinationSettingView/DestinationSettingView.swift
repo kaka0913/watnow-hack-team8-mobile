@@ -21,7 +21,8 @@ struct DestinationSettingView: View {
                         LocationSettingCard(
                             startLocation: $viewModel.startLocation,
                             destination: $viewModel.destination,
-                            destinationPlaceholder: viewModel.destinationPlaceholder
+                            destinationPlaceholder: viewModel.destinationPlaceholder,
+                            onPlaceSelected: viewModel.updateSelectedPlace
                         )
                         
                         // Theme Selection Card

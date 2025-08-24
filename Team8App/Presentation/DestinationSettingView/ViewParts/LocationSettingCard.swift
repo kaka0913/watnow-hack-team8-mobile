@@ -11,6 +11,9 @@ struct LocationSettingCard: View {
     @Binding var startLocation: String
     @Binding var destination: String
     let destinationPlaceholder: String
+    let onPlaceSelected: ((PlaceDetails?) -> Void)?
+    
+    @State private var selectedPlace: PlaceDetails? = nil
     
     var body: some View {
         VStack(spacing: 16) {
@@ -37,8 +40,14 @@ struct LocationSettingCard: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField(destinationPlaceholder, text: $destination)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    AutocompleteTextField(
+                        text: $destination,
+                        selectedPlace: $selectedPlace,
+                        placeholder: destinationPlaceholder
+                    )
+                    .onChange(of: selectedPlace) { oldValue, newValue in
+                        onPlaceSelected?(newValue)
+                    }
                 }
             }
             .padding()
@@ -51,10 +60,3 @@ struct LocationSettingCard: View {
     }
 }
 
-#Preview {
-    LocationSettingCard(
-        startLocation: .constant("現在地から出発"),
-        destination: .constant(""),
-        destinationPlaceholder: "どこへ向かいますか？"
-    )
-}

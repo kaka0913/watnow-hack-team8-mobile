@@ -244,7 +244,7 @@ struct StoryRouteDetailView: View {
                     RouteHighlight(name: "青山公園", iconColor: "green"),
                     RouteHighlight(name: "表参道カフェ", iconColor: "orange"),
                     RouteHighlight(name: "虹の橋展望台", iconColor: "blue")
-                ]
+                ], routePolyline: nil
             )
         )
     )

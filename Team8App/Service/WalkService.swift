@@ -119,7 +119,8 @@ extension WalkService {
             distance: Double(walk.distanceMeters) / 1000.0, // メートルをキロメートルに変換
             category: mapTagsToCategory(walk.tags),
             iconColor: getColorForCategory(mapTagsToCategory(walk.tags)),
-            highlights: walk.tags.map { RouteHighlight(name: $0) }
+            highlights: walk.tags.map { RouteHighlight(name: $0) },
+            routePolyline: walk.routePolyline.isEmpty ? nil : walk.routePolyline // ポリライン情報を追加
         )
     }
     

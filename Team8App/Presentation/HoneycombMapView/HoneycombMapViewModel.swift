@@ -91,15 +91,13 @@ class HoneycombMapViewModel {
             // データが空の場合はモックデータを表示
             if storyRoutes.isEmpty {
                 print("⚠️ APIからのデータが空のため、モックデータを表示")
-                loadMockData()
             }
             
         } catch {
             print("❌ 散歩データ取得エラー: \(error)")
             handleAPIError(error)
             
-            // エラー時はモックデータを表示
-            loadMockData()
+
         }
     }
     
@@ -125,15 +123,13 @@ class HoneycombMapViewModel {
             // データが空の場合はモックデータを表示
             if storyRoutes.isEmpty {
                 print("⚠️ 現在地周辺のデータが空のため、モックデータを表示")
-                loadMockData()
             }
             
         } catch {
             print("❌ 現在地周辺散歩データ取得エラー: \(error)")
             handleAPIError(error)
             
-            // エラー時はモックデータを表示
-            loadMockData()
+
         }
     }
     
@@ -156,52 +152,4 @@ class HoneycombMapViewModel {
         }
     }
     
-    /// モックデータを読み込み
-    private func loadMockData() {
-        storyRoutes = [
-            StoryRoute(
-                id: "mock_1",
-                title: "古都の彩をまとう、祈りの庭散歩",
-                description: "陽光浴びて京友禅。鮮やかな色彩に心ときめかせ、世界で一つの模様を創出。神泉苑では、静寂に包まれ、水面に映る空を仰ぐ。古都の雅と自然美に癒やされる、心潤う昼下がりの散歩。",
-                duration: 29,
-                distance: 1.5,
-                category: .nature,
-                iconColor: .blue,
-                highlights: [
-                    RouteHighlight(name: "京友禅工房"),
-                    RouteHighlight(name: "神泉苑"),
-                    RouteHighlight(name: "寺町通り")
-                ]
-            ),
-            StoryRoute(
-                id: "mock_2",
-                title: "香をまとう、歴史を歩む - 京の昼下がり",
-                description: "晴れた日の京都、老舗の香に包まれ、いざ本能寺へ。織田信長の夢の跡を辿り、歴史の息吹を感じる静寂の散歩道。境内を巡り、昼下がりの陽光を浴びながら、心静かに過去と向き合うひとときを。",
-                duration: 6,
-                distance: 0.8,
-                category: .gourmet,
-                iconColor: .green,
-                highlights: [
-                    RouteHighlight(name: "京都鳩居堂本店"),
-                    RouteHighlight(name: "本能寺"),
-                    RouteHighlight(name: "寺町通商店街")
-                ]
-            ),
-            StoryRoute(
-                id: "mock_3",
-                title: "寺町通り、香と歴史を辿る陽だまり散歩",
-                description: "晴れた昼下がり、本能寺で織田信長の足跡を偲び、京都鳩居堂本店で心落ち着く香に包まれる。寺町通りを抜け、ギア専用劇場へ。芸術に触れる非日常が、心に新しい風を運び込む、発見に満ちた散歩道。",
-                duration: 9,
-                distance: 1.2,
-                category: .art,
-                iconColor: .pink,
-                highlights: [
-                    RouteHighlight(name: "本能寺"),
-                    RouteHighlight(name: "京都鳩居堂本店"),
-                    RouteHighlight(name: "ギア専用劇場")
-                ]
-            )
-        ]
-        print("📊 京都モックデータを読み込み: \(storyRoutes.count)件のルート")
-    }
 }

@@ -125,7 +125,7 @@ struct StoryRouteView: View {
             iconColor: .orange,
             highlights: (proposal.displayHighlights ?? []).map {
                 RouteHighlight(name: $0, iconColor: "orange")
-            }
+            }, routePolyline: nil
         )
 
         print("  → UIに表示: \(storyRoute.duration)分, \(storyRoute.distance)km, \(storyRoute.highlights.count)個ハイライト")

@@ -9,6 +9,7 @@ struct StoryRoute: Identifiable, Codable {
     let category: RouteCategory
     let iconColor: RouteIconColor
     let highlights: [RouteHighlight]
+    let routePolyline: String? // ポリライン文字列を追加
     
     enum RouteCategory: String, Codable, CaseIterable {
         case gourmet = "グルメ・文化"

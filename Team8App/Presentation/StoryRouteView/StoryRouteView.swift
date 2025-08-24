@@ -114,6 +114,7 @@ struct StoryRouteView: View {
         print("  時間: \(proposal.estimatedDurationMinutes?.description ?? "nil")分")
         print("  距離: \(proposal.estimatedDistanceMeters?.description ?? "nil")m")
         print("  ハイライト: \(proposal.displayHighlights?.count ?? 0)個")
+        print("  ポリライン: \(proposal.routePolyline != nil ? "あり(\(proposal.routePolyline!.count)文字)" : "なし")")
 
         let storyRoute = StoryRoute(
             id: proposal.proposalId ?? UUID().uuidString,
@@ -125,10 +126,10 @@ struct StoryRouteView: View {
             iconColor: .orange,
             highlights: (proposal.displayHighlights ?? []).map {
                 RouteHighlight(name: $0, iconColor: "orange")
-            }
+            }, routePolyline: proposal.routePolyline // ポリラインデータを正しく設定
         )
 
-        print("  → UIに表示: \(storyRoute.duration)分, \(storyRoute.distance)km, \(storyRoute.highlights.count)個ハイライト")
+        print("  → UIに表示: \(storyRoute.duration)分, \(storyRoute.distance)km, \(storyRoute.highlights.count)個ハイライト, ポリライン: \(storyRoute.routePolyline != nil ? "あり" : "なし")")
 
         return storyRoute
     }

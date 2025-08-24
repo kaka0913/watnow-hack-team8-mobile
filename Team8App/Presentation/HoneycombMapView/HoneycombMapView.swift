@@ -1,30 +1,52 @@
-//
-//  HoneycombMapView.swift
-//  Team8App
-//
-//  Created by GitHub Copilot on 2025/08/21.
-//
-
 import SwiftUI
 
 struct HoneycombMapView: View {
+    @State private var viewModel = HoneycombMapViewModel()
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
-        ZStack {
-            Color.white
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
+            // ヘッダー
+            MapHeaderView(
+                isMapView: viewModel.isMapView,
+                onDisplayModeToggle: viewModel.toggleDisplayMode,
+                onBackTap: {
+                    dismiss()
+                }
+            )
             
-            Text("C")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.black)
+            // メインコンテンツ
+            if viewModel.isMapView {
+                HoneycombMapContentView(
+                    routes: viewModel.storyRoutes,
+                    onRouteSelect: viewModel.selectRoute
+                )
+            } else {
+                HoneycombListContentView(
+                    routes: viewModel.storyRoutes,
+                    onRouteSelect: viewModel.selectRoute
+                )
+            }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("ハニカムマップを見る")
+        .navigationBarHidden(true)
+        .sheet(isPresented: $viewModel.isShowingRouteDetail) {
+            if let selectedRoute = viewModel.selectedRoute {
+                StoryRouteDetailView(
+                    viewModel: StoryRouteDetailViewModel(route: selectedRoute)
+                )
+                .onDisappear {
+                    viewModel.clearSelection()
+                }
+            }
+        }
+        .onAppear {
+            print("📱 ハニカムマップ画面が表示されました")
+            // データを更新
+            viewModel.refreshWalks()
+        }
     }
 }
 
 #Preview {
-    NavigationStack {
-        HoneycombMapView()
-    }
+    HoneycombMapView()
 }

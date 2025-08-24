@@ -26,9 +26,14 @@ class WalkSummaryViewModel {
     // Dismiss action
     var onDismiss: (() -> Void)?
     
+    // Navigate to Home action
+    var onNavigateToHome: (() -> Void)?
+    
     func dismiss() {
         onDismiss?()
     }
+    
+    func navigateToHome() {
+        onNavigateToHome?()
+    }
 }
-
-

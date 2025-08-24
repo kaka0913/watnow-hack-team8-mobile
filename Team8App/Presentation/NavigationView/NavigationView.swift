@@ -38,9 +38,6 @@ struct NavigationView: View {
     @State private var bottomSheetOffset: CGFloat = 0
     @State private var isBottomSheetExpanded: Bool = true
     
-    // ルート逸脱ダイアログの状態管理
-    @State private var showRouteDeviationDialog: Bool = false
-    
     init(selectedRoute: StoryRoute? = nil) {
         self.selectedRoute = selectedRoute
     }
@@ -70,9 +67,11 @@ struct NavigationView: View {
                     // 地図エリア（フルスクリーン）
                     MapContainerView(
                         region: $viewModel.mapRegion,
-                        currentLocation: viewModel.currentLocation,
-                        route: viewModel.route,
-                        isNavigationActive: true
+                        routeCoordinates: $viewModel.routeCoordinates,
+                        annotations: $viewModel.annotations,
+                        onLocationUpdate: { coordinate in
+                            viewModel.currentLocation = coordinate
+                        }
                     )
                     .clipped() // 地図の境界を明確にする
                     .overlay(
@@ -81,7 +80,7 @@ struct NavigationView: View {
                             HStack {
                                 Spacer()
                                 HoneyBeeIcon(onTap: {
-                                    showRouteDeviationDialog = true
+                                    viewModel.showRouteDeviationDialog = true
                                 })
                                     .padding(.trailing, 16)
                                     .padding(.top, 16)
@@ -183,19 +182,21 @@ struct NavigationView: View {
             }
             
             // ルート逸脱ダイアログオーバーレイ
-            if showRouteDeviationDialog {
+            if viewModel.showRouteDeviationDialog {
                 RouteDeviationDialog(
-                    isPresented: $showRouteDeviationDialog,
+                    isPresented: $viewModel.showRouteDeviationDialog,
                     onRecalculateRoute: {
                         Task {
                             await viewModel.recalculateRoute()
-                            // ダイアログを閉じる
                             await MainActor.run {
-                                showRouteDeviationDialog = false
+                                viewModel.dismissRouteDeviationDialog()
                             }
                         }
                     }
                 )
+                .onDisappear {
+                    viewModel.dismissRouteDeviationDialog()
+                }
             }
             
             if viewModel.isLoading {

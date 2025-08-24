@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PostSelectionCard: View {
     @Bindable var viewModel: WalkSummaryViewModel
+    let onNavigateToHome: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -20,7 +21,12 @@ struct PostSelectionCard: View {
             }
             
             HStack(spacing: 12) {
-                Button(action: { viewModel.shouldPost = true }) {
+                Button(action: { 
+                    print("🏠 投稿するボタンがタップされました")
+                    viewModel.shouldPost = true
+                    onNavigateToHome()
+                    print("🏠 HomeViewへの遷移をトリガーしました")
+                }) {
                     HStack {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundColor(.gray)
@@ -40,7 +46,12 @@ struct PostSelectionCard: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
-                Button(action: { viewModel.shouldPost = false }) {
+                Button(action: { 
+                    print("🏠 投稿しないボタンがタップされました")
+                    viewModel.shouldPost = false
+                    onNavigateToHome()
+                    print("🏠 HomeViewへの遷移をトリガーしました")
+                }) {
                     HStack {
                         Image(systemName: "heart")
                             .foregroundColor(.gray)
@@ -66,8 +77,4 @@ struct PostSelectionCard: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
-}
-
-#Preview {
-    PostSelectionCard(viewModel: WalkSummaryViewModel())
 }

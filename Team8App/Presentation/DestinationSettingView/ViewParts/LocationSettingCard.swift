@@ -11,6 +11,11 @@ struct LocationSettingCard: View {
     @Binding var startLocation: String
     @Binding var destination: String
     let destinationPlaceholder: String
+    let onPlaceSelected: ((PlaceDetails?) -> Void)?
+    let onStartPlaceSelected: ((PlaceDetails?) -> Void)?
+    
+    @State private var selectedPlace: PlaceDetails? = nil
+    @State private var selectedStartPlace: PlaceDetails? = nil
     
     var body: some View {
         VStack(spacing: 16) {
@@ -26,9 +31,14 @@ struct LocationSettingCard: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField("", text: $startLocation)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .disabled(true) // 現在地固定
+                    AutocompleteTextField(
+                        text: $startLocation,
+                        selectedPlace: $selectedStartPlace,
+                        placeholder: "現在地から出発（変更可能）"
+                    )
+                    .onChange(of: selectedStartPlace) { oldValue, newValue in
+                        onStartPlaceSelected?(newValue)
+                    }
                 }
                 
                 // Destination
@@ -37,23 +47,23 @@ struct LocationSettingCard: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    TextField(destinationPlaceholder, text: $destination)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    AutocompleteTextField(
+                        text: $destination,
+                        selectedPlace: $selectedPlace,
+                        placeholder: destinationPlaceholder
+                    )
+                    .onChange(of: selectedPlace) { oldValue, newValue in
+                        onPlaceSelected?(newValue)
+                    }
                 }
             }
             .padding()
             .background(Color(.systemBackground))
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            .contentShape(Rectangle()) // タップエリアを明確にする
         }
         .padding(.horizontal)
     }
 }
 
-#Preview {
-    LocationSettingCard(
-        startLocation: .constant("現在地から出発"),
-        destination: .constant(""),
-        destinationPlaceholder: "どこへ向かいますか？"
-    )
-}

@@ -105,5 +105,36 @@ class StoryRouteViewModel {
         self.routeProposals = proposals
     }
     
+    // RouteProposalからStoryRouteに変換したデータを取得
+    func getConvertedStoryRoutes() -> [StoryRoute] {
+        return routeProposals.map { proposal in
+            StoryRoute(
+                id: proposal.proposalId ?? UUID().uuidString,
+                title: proposal.title,
+                description: proposal.generatedStory ?? "素晴らしい散歩ルートです",
+                duration: proposal.estimatedDurationMinutes ?? 60,
+                distance: Double(proposal.estimatedDistanceMeters ?? 2000) / 1000.0,
+                category: mapThemeToCategory(proposal.theme ?? "gourmet"),
+                iconColor: .orange,
+                highlights: (proposal.displayHighlights ?? []).map {
+                    RouteHighlight(name: $0, iconColor: "orange")
+                },
+                routePolyline: proposal.routePolyline // ポリラインデータを正しく設定
+            )
+        }
+    }
+    
+    // テーマからカテゴリーへのマッピング
+    private func mapThemeToCategory(_ theme: String) -> StoryRoute.RouteCategory {
+        switch theme {
+        case "nature":
+            return .nature
+        case "culture", "art":
+            return .art
+        default:
+            return .gourmet
+        }
+    }
+    
 
 }

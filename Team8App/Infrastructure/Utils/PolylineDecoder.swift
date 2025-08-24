@@ -14,6 +14,11 @@ struct PolylineDecoder {
     /// - Parameter encodedPolyline: Google Polyline Algorithm 5でエンコードされた文字列
     /// - Returns: デコードされた座標の配列
     static func decode(_ encodedPolyline: String) -> [CLLocationCoordinate2D] {
+        print(encodedPolyline)
+        print("🔍 PolylineDecoder.decode() 開始")
+        print("   - 入力ポリライン長: \(encodedPolyline.count)")
+        print("   - 先頭20文字: \(String(encodedPolyline.prefix(20)))")
+        
         guard !encodedPolyline.isEmpty else {
             print("⚠️ PolylineDecoder: 空のポリライン文字列が渡されました")
             return []
@@ -25,12 +30,13 @@ struct PolylineDecoder {
         
         var lat = 0
         var lng = 0
+        var pointCount = 0
         
         while index < endIndex {
             // 緯度をデコード
             let latResult = decodeValue(from: encodedPolyline, startIndex: &index, endIndex: endIndex)
             guard let decodedLat = latResult else {
-                print("❌ PolylineDecoder: 緯度のデコードに失敗しました")
+                print("❌ PolylineDecoder: 緯度のデコードに失敗しました (point \(pointCount))")
                 break
             }
             lat += decodedLat
@@ -38,7 +44,7 @@ struct PolylineDecoder {
             // 経度をデコード
             let lngResult = decodeValue(from: encodedPolyline, startIndex: &index, endIndex: endIndex)
             guard let decodedLng = lngResult else {
-                print("❌ PolylineDecoder: 経度のデコードに失敗しました")
+                print("❌ PolylineDecoder: 経度のデコードに失敗しました (point \(pointCount))")
                 break
             }
             lng += decodedLng
@@ -47,13 +53,31 @@ struct PolylineDecoder {
             let latitude = Double(lat) / 1e5
             let longitude = Double(lng) / 1e5
             
-            coordinates.append(CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
+            let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            coordinates.append(coordinate)
+            
+            // 最初の5個と最後の5個の座標を詳細ログ
+            if pointCount < 5 || coordinates.count <= 5 {
+                print("   - Point \(pointCount): (\(latitude), \(longitude))")
+            }
+            
+            pointCount += 1
         }
         
         print("✅ PolylineDecoder: \(coordinates.count)個の座標をデコードしました")
         if coordinates.count > 0 {
             print("   - 開始地点: (\(coordinates.first!.latitude), \(coordinates.first!.longitude))")
             print("   - 終了地点: (\(coordinates.last!.latitude), \(coordinates.last!.longitude))")
+            
+            // 座標の妥当性をチェック
+            let validCount = coordinates.filter { coordinate in
+                abs(coordinate.latitude) <= 90 && abs(coordinate.longitude) <= 180
+            }.count
+            print("   - 有効座標数: \(validCount)/\(coordinates.count)")
+            
+            // 重複座標の確認
+            let uniqueCoordinates = Set(coordinates.map { "\($0.latitude),\($0.longitude)" })
+            print("   - ユニーク座標数: \(uniqueCoordinates.count)")
         }
         
         return coordinates

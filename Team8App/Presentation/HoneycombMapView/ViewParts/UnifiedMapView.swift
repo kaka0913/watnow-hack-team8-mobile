@@ -23,96 +23,52 @@ struct UnifiedMapView: UIViewRepresentable {
     }
     
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        // コーディネーターに最新のデータを渡す
-        context.coordinator.routes = routes
-        context.coordinator.onRouteSelect = onRouteSelect
-        
+        print("🗺️ UnifiedMapView.updateUIView() 開始")
         print("🔍 処理対象ルート数: \(routes.count)")
         
-        // ルートが空の場合は何もしない（初期化時の空配列での呼び出しを防ぐ）
-        guard !routes.isEmpty else {
-            print("⚠️ ルートが空のため、マップ更新をスキップします")
-            return
-        }
-        
-        // 既存のアノテーションとオーバーレイを削除
-        mapView.removeAnnotations(mapView.annotations.filter { !($0 is MKUserLocation) })
-        mapView.removeOverlays(mapView.overlays)
-        
-        // 各ルートにアノテーションとポリラインを追加
-        var addedPolylines: [String] = []  // 重複確認用
-        var allCoordinates: [CLLocationCoordinate2D] = []  // 全座標を収集してマップ範囲を調整
-        
-        for route in routes {
-            print("🔍 ルート処理中: \(route.title)")
-            print("🔍 ポリラインデータ: \(route.routePolyline != nil ? "あり" : "なし")")
-            
-            // ポリラインを追加
-            if let polylineString = route.routePolyline {
-                let coordinates = PolylineDecoder.decode(polylineString)
-                
-                if PolylineDecoder.isValidCoordinates(coordinates) && coordinates.count > 1 {
-                    // 重複チェック
-                    let polylineKey = polylineString.prefix(20).description  // 最初の20文字で重複判定
-                    if addedPolylines.contains(polylineKey) {
-                        print("⚠️ 重複ポリライン検出: \(route.title)")
-                    } else {
-                        addedPolylines.append(polylineKey)
-                        print("✅ 新規ポリライン: \(route.title)")
-                    }
-                    
-                    let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
-                    polyline.title = route.id
-                    mapView.addOverlay(polyline)
-                    
-                    // 全座標を収集
-                    allCoordinates.append(contentsOf: coordinates)
-                    
-                    // アノテーションを追加（ポリラインの開始点に配置）
-                    let annotation = RouteAnnotation(route: route, coordinate: coordinates[0])
-                    mapView.addAnnotation(annotation)
-                    
-                    print("🗺️ ポリライン追加: \(route.title) (\(coordinates.count)点)")
-                } else {
-                    print("⚠️ ポリラインデータが無効: \(route.title)")
-                    // ポリラインデータがない場合は京都駅周辺にアノテーションを配置
-                    let annotation = RouteAnnotation(route: route, coordinate: initialRegion.center)
-                    mapView.addAnnotation(annotation)
-                }
-            } else {
-                print("⚠️ ポリラインデータがない: \(route.title)")
-                // ポリラインデータがない場合は京都駅周辺にアノテーションを配置
-                let annotation = RouteAnnotation(route: route, coordinate: initialRegion.center)
-                mapView.addAnnotation(annotation)
+        // 現在表示されているポリラインをログ出力
+        print("📍 現在の地図上のポリライン数: \(mapView.overlays.count)")
+        for (index, overlay) in mapView.overlays.enumerated() {
+            if let polyline = overlay as? MKPolyline {
+                print("   - ポリライン\(index): \(polyline.pointCount)点")
             }
         }
         
-        // マップの表示範囲を全ルートに合わせて調整（初回のみ、またはユーザーが操作していない場合のみ）
-        if !allCoordinates.isEmpty && !context.coordinator.hasSetInitialRegion && !context.coordinator.userHasInteracted {
-            let minLat = allCoordinates.map { $0.latitude }.min() ?? initialRegion.center.latitude
-            let maxLat = allCoordinates.map { $0.latitude }.max() ?? initialRegion.center.latitude
-            let minLon = allCoordinates.map { $0.longitude }.min() ?? initialRegion.center.longitude
-            let maxLon = allCoordinates.map { $0.longitude }.max() ?? initialRegion.center.longitude
+        // 既存のポリラインを削除
+        mapView.removeOverlays(mapView.overlays)
+        print("🗑️ 既存のポリラインを削除")
+        
+        // ルートごとにポリラインを追加
+        for (index, route) in routes.enumerated() {
+            print("🔍 ルート処理中[\(index)]: \(route.title)")
+            print("   - ID: \(route.id)")
             
-            let center = CLLocationCoordinate2D(
-                latitude: (minLat + maxLat) / 2,
-                longitude: (minLon + maxLon) / 2
-            )
-            let span = MKCoordinateSpan(
-                latitudeDelta: (maxLat - minLat) * 1.2,  // 20%のマージンを追加
-                longitudeDelta: (maxLon - minLon) * 1.2
-            )
-            
-            let adjustedRegion = MKCoordinateRegion(center: center, span: span)
-            mapView.setRegion(adjustedRegion, animated: true)
-            context.coordinator.hasSetInitialRegion = true
-            
-            print("🗺️ マップ範囲調整: 中心(\(center.latitude), \(center.longitude)), スパン(\(span.latitudeDelta), \(span.longitudeDelta))")
-            print("📊 重複ポリライン統計: 重複 \(routes.count - addedPolylines.count) 件, ユニーク \(addedPolylines.count) 件")
-        } else if context.coordinator.userHasInteracted {
-            print("🤚 ユーザーが地図を操作済みのため、自動範囲調整をスキップ")
-            print("📊 重複ポリライン統計: 重複 \(routes.count - addedPolylines.count) 件, ユニーク \(addedPolylines.count) 件")
+            if let polylineString = route.routePolyline, !polylineString.isEmpty {
+                print("   - ポリライン文字列長: \(polylineString.count)")
+                print("   - ポリライン先頭20文字: \(String(polylineString.prefix(20)))")
+                
+                let coordinates = PolylineDecoder.decode(polylineString)
+                print("   - デコード結果: \(coordinates.count)個の座標")
+                
+                if coordinates.count >= 2 {
+                    if coordinates.count > 0 {
+                        print("   - 開始座標: (\(coordinates[0].latitude), \(coordinates[0].longitude))")
+                        print("   - 終了座標: (\(coordinates[coordinates.count-1].latitude), \(coordinates[coordinates.count-1].longitude))")
+                    }
+                    
+                    let polyline = MKPolyline(coordinates: coordinates, count: coordinates.count)
+                    polyline.title = route.title // タイトルを設定してデバッグ用
+                    mapView.addOverlay(polyline)
+                    print("✅ ポリライン追加完了: \(route.title)")
+                } else {
+                    print("❌ 座標数が不足: \(coordinates.count)個")
+                }
+            } else {
+                print("❌ ポリライン情報がありません")
+            }
         }
+        
+        print("🗺️ UnifiedMapView.updateUIView() 完了")
     }
     
     func makeCoordinator() -> Coordinator {

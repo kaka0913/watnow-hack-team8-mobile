@@ -5,6 +5,7 @@ import Foundation
 class HoneycombMapViewModel {
     // MARK: - Services
     private let walkService = WalkService.shared
+    private let storyRouteViewModel = StoryRouteViewModel.shared
     
     // MARK: - State Properties
     var isMapView: Bool = true
@@ -27,8 +28,9 @@ class HoneycombMapViewModel {
     
     // MARK: - Initialization
     init() {
+        // RouteProposalデータがある場合はそれを優先、なければWalkデータを取得
         Task {
-            await loadWalksData()
+            await loadRouteData()
         }
     }
     
@@ -55,7 +57,7 @@ class HoneycombMapViewModel {
     /// 散歩データを再読み込み
     func refreshWalks() {
         Task {
-            await loadWalksData()
+            await loadRouteData()
         }
     }
     
@@ -67,6 +69,23 @@ class HoneycombMapViewModel {
     }
     
     // MARK: - Private Methods
+    
+    /// ルートデータを取得（RouteProposal優先、なければWalkデータ）
+    @MainActor
+    private func loadRouteData() async {
+        // まずRouteProposalデータを確認
+        let routeProposalRoutes = storyRouteViewModel.getConvertedStoryRoutes()
+        
+        if !routeProposalRoutes.isEmpty {
+            print("🗺️ RouteProposalデータを使用: \(routeProposalRoutes.count)件")
+            self.storyRoutes = routeProposalRoutes
+            return
+        }
+        
+        // RouteProposalデータがない場合はWalkデータを取得
+        print("🗺️ RouteProposalデータがないため、Walkデータを取得")
+        await loadWalksData()
+    }
     
     /// 散歩データをAPIから取得
     /// - Parameter bbox: バウンディングボックス（オプション）

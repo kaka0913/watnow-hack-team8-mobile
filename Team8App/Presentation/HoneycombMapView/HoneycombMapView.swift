@@ -41,6 +41,8 @@ struct HoneycombMapView: View {
         }
         .onAppear {
             print("📱 ハニカムマップ画面が表示されました")
+            // データを更新
+            viewModel.refreshWalks()
         }
     }
 }

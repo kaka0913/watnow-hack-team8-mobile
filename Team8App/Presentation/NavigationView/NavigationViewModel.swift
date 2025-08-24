@@ -273,26 +273,45 @@ class NavigationViewModel: NSObject {
     }
     
     func setSelectedRoute(_ route: StoryRoute) {
+        print("🔄 NavigationViewModel.setSelectedRoute() 開始")
+        print("📋 受信したルート情報:")
+        print("   - ID: \(route.id)")
+        print("   - Title: \(route.title)")
+        print("   - Duration: \(route.duration)分")
+        print("   - Distance: \(route.distance)km")
+        print("   - Description: \(route.description)")
+        print("   - RoutePolyline: \(route.routePolyline ?? "nil")")
+        
         // 選択されたルートの情報を保存
         currentProposalId = route.id
         
         // DestinationSettingViewModelから目的地座標を復元
         // （DestinationSettingViewModelで使用された座標と同じ値を使用）
-        currentDestination = Location(
-            latitude: 34.9735, // DestinationSettingViewModelと同じ座標
-            longitude: 135.7582
-        )
         currentMode = .destination
-        
         // ルートタイトルを設定
         routeTitle = route.title
         
-        // 保存されているポリライン情報があれば復元
-        if let savedPolyline = UserDefaults.standard.string(forKey: "currentRoutePolyline") {
-            let decodedRoute = PolylineDecoder.decode(savedPolyline)
+        // ルート自体のポリライン情報があれば直接使用
+        if let routePolyline = route.routePolyline, !routePolyline.isEmpty {
+            print("📍 StoryRouteからポリライン直接使用:")
+            print("   - ポリライン文字列長: \(routePolyline.count)")
+            print("   - ポリライン先頭20文字: \(String(routePolyline.prefix(20)))")
+
+
+            let decodedRoute = PolylineDecoder.decode(routePolyline)
+            print("🔍 PolylineDecoder結果: \(decodedRoute.count)個の座標")
+            
             if PolylineDecoder.isValidCoordinates(decodedRoute) {
                 self.route = decodedRoute
                 self.routeCoordinates = decodedRoute
+                
+                print("✅ StoryRouteポリラインからルート座標設定:")
+                print("   - route.count: \(self.route.count)")
+                print("   - routeCoordinates.count: \(self.routeCoordinates.count)")
+                if decodedRoute.count > 0 {
+                    print("   - 開始座標: (\(decodedRoute[0].latitude), \(decodedRoute[0].longitude))")
+                    print("   - 終了座標: (\(decodedRoute[decodedRoute.count-1].latitude), \(decodedRoute[decodedRoute.count-1].longitude))")
+                }
                 
                 // アノテーションを設定
                 updateAnnotations(for: decodedRoute)
@@ -300,9 +319,44 @@ class NavigationViewModel: NSObject {
                 // 地図の表示領域をルートに合わせて調整
                 if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
                     mapRegion = newRegion
+                    print("🗺 地図領域調整完了: center=(\(newRegion.center.latitude), \(newRegion.center.longitude))")
                 }
                 
-                print("🗺 選択されたルートのポリラインから\(decodedRoute.count)個の座標を復元しました")
+                print("🗺 選択されたルートのポリラインから\(decodedRoute.count)個の座標を設定しました")
+            } else {
+                print("❌ StoryRouteポリラインのデコードに失敗")
+            }
+        } else {
+            print("⚠️ StoryRouteにポリライン情報がありません")
+            
+            // 保存されているポリライン情報があれば復元
+            if let savedPolyline = UserDefaults.standard.string(forKey: "currentRoutePolyline") {
+                print("🔄 UserDefaultsからポリライン復元を試行")
+                print("   - ポリライン文字列長: \(savedPolyline.count)")
+                
+                let decodedRoute = PolylineDecoder.decode(savedPolyline)
+                if PolylineDecoder.isValidCoordinates(decodedRoute) {
+                    self.route = decodedRoute
+                    self.routeCoordinates = decodedRoute
+                    
+                    print("✅ UserDefaultsポリラインからルート座標設定:")
+                    print("   - route.count: \(self.route.count)")
+                    print("   - routeCoordinates.count: \(self.routeCoordinates.count)")
+                    
+                    // アノテーションを設定
+                    updateAnnotations(for: decodedRoute)
+                    
+                    // 地図の表示領域をルートに合わせて調整
+                    if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
+                        mapRegion = newRegion
+                    }
+                    
+                    print("🗺 選択されたルートのポリラインから\(decodedRoute.count)個の座標を復元しました")
+                } else {
+                    print("❌ UserDefaultsポリラインのデコードに失敗")
+                }
+            } else {
+                print("❌ UserDefaultsにもポリライン情報がありません")
             }
         }
         
@@ -318,6 +372,12 @@ class NavigationViewModel: NSObject {
         userDefaults.set(route.distance, forKey: "currentRouteDistance")
         userDefaults.set(route.description, forKey: "currentRouteDescription")
         
+        // ポリライン情報も保存
+        if let routePolyline = route.routePolyline {
+            userDefaults.set(routePolyline, forKey: "currentRoutePolyline")
+            print("💾 StoryRouteのポリラインをUserDefaultsに保存")
+        }
+        
         // WalkModeを文字列として保存
         userDefaults.set("destination", forKey: "currentWalkMode")
         
@@ -325,6 +385,7 @@ class NavigationViewModel: NSObject {
         if let destination = currentDestination {
             userDefaults.set(destination.latitude, forKey: "currentDestinationLatitude")
             userDefaults.set(destination.longitude, forKey: "currentDestinationLongitude")
+            print("💾 目的地座標をUserDefaultsに保存: (\(destination.latitude), \(destination.longitude))")
         }
         
         // 保存を確実に実行
@@ -336,13 +397,17 @@ class NavigationViewModel: NSObject {
         print("   - 時間: \(route.duration)分")
         print("   - 距離: \(route.distance)km")
         print("💾 UserDefaultsに保存完了")
+        print("✅ NavigationViewModel.setSelectedRoute() 完了")
     }
     
     func loadSavedRoute() {
+        print("🔍 NavigationViewModel.loadSavedRoute() 開始")
+        
         // UserDefaultsから保存されたルート情報を復元
         let userDefaults = UserDefaults.standard
         
         if let savedProposalId = userDefaults.string(forKey: "currentProposalId") {
+            print("📂 UserDefaultsからproposalId復元: \(savedProposalId)")
             currentProposalId = savedProposalId
             
             // 基本情報を復元
@@ -352,6 +417,10 @@ class NavigationViewModel: NSObject {
             _ = userDefaults.string(forKey: "currentRouteDescription") ?? ""
             let savedMode = userDefaults.string(forKey: "currentWalkMode") ?? "destination"
             
+            print("📋 基本情報復元:")
+            print("   - savedTitle: \(savedTitle)")
+            print("   - savedMode: \(savedMode)")
+            
             // ルートタイトルを設定
             routeTitle = savedTitle.isEmpty ? "ナビゲーション中" : savedTitle
             
@@ -360,18 +429,40 @@ class NavigationViewModel: NSObject {
             let actualDistance = userDefaults.object(forKey: "currentRouteActualDistance") as? Int
             let savedStory = userDefaults.string(forKey: "currentRouteStory")
             
+            print("🌐 APIデータ復元:")
+            print("   - actualDuration: \(actualDuration ?? 0)")
+            print("   - actualDistance: \(actualDistance ?? 0)")
+            print("   - savedStory length: \(savedStory?.count ?? 0)")
+            
             // ナビゲーションステップを復元
             if let stepsData = userDefaults.data(forKey: "currentRouteNavigationSteps"),
                let navigationSteps = try? JSONDecoder().decode([NavigationStep].self, from: stepsData) {
+                print("📍 ナビゲーションステップ復元: \(navigationSteps.count)個")
                 loadNavigationStepsFromAPI(navigationSteps, actualDuration: actualDuration)
+            } else {
+                print("⚠️ ナビゲーションステップの復元に失敗")
             }
             
             // ポリラインを復元してルート座標を設定
             if let savedPolyline = userDefaults.string(forKey: "currentRoutePolyline") {
+                print("🗺 UserDefaultsからポリライン復元開始")
+                print("   - ポリライン文字列長: \(savedPolyline.count)")
+                print("   - ポリライン先頭20文字: \(String(savedPolyline.prefix(20)))")
+                
                 let decodedRoute = PolylineDecoder.decode(savedPolyline)
+                print("🔍 PolylineDecoder結果: \(decodedRoute.count)個の座標")
+                
                 if PolylineDecoder.isValidCoordinates(decodedRoute) {
                     route = decodedRoute
                     routeCoordinates = decodedRoute
+                    
+                    print("✅ ルート座標設定完了:")
+                    print("   - route.count: \(route.count)")
+                    print("   - routeCoordinates.count: \(routeCoordinates.count)")
+                    if decodedRoute.count > 0 {
+                        print("   - 開始座標: (\(decodedRoute[0].latitude), \(decodedRoute[0].longitude))")
+                        print("   - 終了座標: (\(decodedRoute[decodedRoute.count-1].latitude), \(decodedRoute[decodedRoute.count-1].longitude))")
+                    }
                     
                     // アノテーションを更新
                     updateAnnotations(for: decodedRoute)
@@ -379,17 +470,21 @@ class NavigationViewModel: NSObject {
                     // 地図の表示領域をルートに合わせて調整
                     if let newRegion = PolylineDecoder.calculateMapRegion(from: decodedRoute) {
                         mapRegion = newRegion
+                        print("🗺 地図領域調整完了: center=(\(newRegion.center.latitude), \(newRegion.center.longitude))")
                     }
                     
                     print("🗺 保存されたポリラインから\(decodedRoute.count)個の座標を復元しました")
                 } else {
-                    print("⚠️ 保存されたポリラインのデコードに失敗しました")
+                    print("❌ 保存されたポリラインのデコードに失敗しました")
                 }
+            } else {
+                print("⚠️ UserDefaultsにポリライン情報が見つかりません")
             }
             
             // ストーリーを復元
             if let story = savedStory {
                 currentStoryText = story
+                print("📖 ストーリー復元完了: \(story.count)文字")
             }
             
             // 実際の時間と距離を表示
@@ -408,6 +503,7 @@ class NavigationViewModel: NSObject {
             let destinationLon = userDefaults.double(forKey: "currentDestinationLongitude")
             if destinationLat != 0 && destinationLon != 0 {
                 currentDestination = Location(latitude: destinationLat, longitude: destinationLon)
+                print("🎯 目的地座標復元: (\(destinationLat), \(destinationLon))")
             }
             
             print("📱 UserDefaultsから実際のAPIデータを復元:")
@@ -417,9 +513,12 @@ class NavigationViewModel: NSObject {
             print("   - 実際の距離: \(actualDistance ?? 0)m")
             print("   - ストーリー: \(savedStory != nil ? "復元完了" : "なし")")
             print("   - ナビゲーションステップ: 復元完了")
+            print("   - ポリライン座標数: \(route.count)")
         } else {
             print("📱 保存されたルート情報が見つかりませんでした")
         }
+        
+        print("✅ NavigationViewModel.loadSavedRoute() 完了")
     }
     
     private func loadNavigationStepsFromAPI(_ steps: [NavigationStep], actualDuration: Int?) {

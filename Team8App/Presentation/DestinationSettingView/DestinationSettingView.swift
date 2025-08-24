@@ -9,6 +9,10 @@ struct DestinationSettingView: View {
             ZStack {
                 Color(red: 1.0, green: 1.0, blue: 0.90)
                     .ignoresSafeArea()
+                    .onTapGesture {
+                        // キーボードを閉じる
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
                 
                     VStack(spacing: 20) {
                         Spacer().frame(height: 20)

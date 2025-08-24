@@ -113,11 +113,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // 実際のCLLocationManagerの状態と同期
         authorizationStatus = locationManager.authorizationStatus
         
-        // 既に位置情報がある場合はそれを返す
-        if let location = currentLocation {
-            print("😁 [LocationManager] 既存の位置情報を返します: \(location.latitude), \(location.longitude)")
-            return location
-        }
+        // 古い位置情報をクリアして新しい位置情報を強制取得
+        currentLocation = nil
+        print("😁 [LocationManager] キャッシュされた位置情報をクリアして新しい位置情報を取得します")
         
         // 位置情報の許可状況を確認
         switch authorizationStatus {
@@ -128,8 +126,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 startLocationUpdates()
             }
             
-            // 最大5秒間待機して位置情報を取得
-            for i in 0..<50 {
+            // 最大10秒間待機して位置情報を取得
+            for i in 0..<100 {
                 if let location = currentLocation {
                     print("😁 [LocationManager] \(i * 100)ms 後に位置情報を取得できました: \(location.latitude), \(location.longitude)")
                     return location
@@ -137,8 +135,29 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 0.1秒待機
             }
             
-            // タイムアウトした場合はデフォルト位置を返す
-            print("⚠️ 位置情報の取得がタイムアウトしました。デフォルト位置を使用します。")
+            // タイムアウトした場合でも最後に現在地取得を試行
+            print("⚠️ 位置情報の取得がタイムアウトしました。最後の試行...")
+            if let location = currentLocation {
+                print("😁 [LocationManager] 最後の試行で位置情報を取得: \(location.latitude), \(location.longitude)")
+                return location
+            }
+            
+            // 絶対に現在地を使いたい場合は、デフォルト位置を返さずに一度更新を停止して再開
+            print("⚠️ 位置情報更新を再開して再試行します...")
+            stopLocationUpdates()
+            startLocationUpdates()
+            
+            // 再試行
+            for i in 0..<50 {
+                if let location = currentLocation {
+                    print("😁 [LocationManager] 再試行で位置情報を取得: \(location.latitude), \(location.longitude)")
+                    return location
+                }
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1秒待機
+            }
+            
+            // 最終的にデフォルト位置を返す
+            print("⚠️ 最終的にデフォルト位置を使用します。")
             return defaultLocation
             
         case .denied, .restricted:
